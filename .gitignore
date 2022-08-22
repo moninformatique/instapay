@@ -21,6 +21,7 @@
 /ios/
 /linux/
 /windows/
+/macos/
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
