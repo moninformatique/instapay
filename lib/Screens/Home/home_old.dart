@@ -15,7 +15,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-        drawer: NavBar(userData: {},
+        drawer: NavBar(
             //userData: data,
             ),
         appBar: AppBar(

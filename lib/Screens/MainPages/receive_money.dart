@@ -1,12 +1,17 @@
 // ignore_for_file: avoid_print
 
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import '../../components/constants.dart';
 
 import '../Home/component/qrcode_container.dart';
 
 class ReceiveMoney extends StatefulWidget {
-  const ReceiveMoney({Key? key}) : super(key: key);
+  final String userContact;
+  const ReceiveMoney({Key? key, required this.userContact}) : super(key: key);
 
   @override
   State<ReceiveMoney> createState() => _ReceiveMoneyState();
@@ -14,17 +19,32 @@ class ReceiveMoney extends StatefulWidget {
 
 class _ReceiveMoneyState extends State<ReceiveMoney> {
   TextEditingController myTransactionaddress = TextEditingController();
+
+  String hashSomeThing(var data) {
+    var dataEncoded = utf8.encode(data.toString());
+    Digest hash = sha256.convert(dataEncoded);
+    return hash.toString();
+  }
+
+  String generateNewAddress(String userContact) {
+    double random = Random().nextDouble() * 999999.9;
+    String address = hashSomeThing(random).substring(0, 10);
+    address = "$userContact@$address";
+    String addressHashed = "addr${hashSomeThing(address)}";
+    return addressHashed;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar(),
+      //appBar: buildAppBar(),
       body: Column(
         children: <Widget>[
           appBarBottomSection(),
           const SizedBox(
             height: 50,
           ),
-          mainBody(),
+          mainBody(widget.userContact),
         ],
       ),
     );
@@ -138,8 +158,10 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
     );
   }
 
-  Expanded mainBody() {
+  Expanded mainBody(String userContact) {
     Size size = MediaQuery.of(context).size;
+    String transactionAddress = generateNewAddress(userContact);
+
     return Expanded(
       child: Column(
         children: [
@@ -156,12 +178,12 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
                     color: Colors.transparent,
                     border: Border.all(color: kPrimaryColor, width: 1.0),
                   ),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
                         vertical: defaultPadding,
                         horizontal: defaultPadding * 2),
                     child: QrcodeContainer(
-                      data: "data!['number'] + '@' + data!['cni']",
+                      data: transactionAddress,
                     ),
                   ),
                 ),
@@ -178,8 +200,19 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text("addr7xaniAic8Adi24aoXjora"),
+                    children: [
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Text(
+                            transactionAddress,
+                            overflow: TextOverflow.fade,
+                            maxLines: 1,
+                            softWrap: false,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -191,7 +224,11 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
                   padding: const EdgeInsets.symmetric(
                       vertical: defaultPadding, horizontal: defaultPadding * 3),
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        generateNewAddress(userContact);
+                      });
+                    },
                     child: const Text(
                       "Générer une nouvvelle adresse",
                     ),

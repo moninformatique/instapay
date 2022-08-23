@@ -1,7 +1,7 @@
 // ignore_for_file: sized_box_for_whitespace, prefer_interpolation_to_compose_strings
-
-import '../../constants.dart';
 import 'package:flutter/material.dart';
+import '../../constants.dart';
+
 
 class SettingScreen extends StatelessWidget {
   final Map<String, dynamic>? data;

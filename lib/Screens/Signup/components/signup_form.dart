@@ -1,6 +1,8 @@
 // ignore_for_file: avoid_print
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
+import 'package:http/http.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
@@ -61,6 +63,19 @@ class SignUpForm extends StatelessWidget {
     session.writeAsString(sessionData);
     print("Sauvegarde du compte");
     return file.writeAsString(data);
+  }
+
+  Future send(var json) async {
+    //Méthode d'envoie vers l'API
+    Uri url = Uri.parse('http://devinspay.pythonanywhere.com/api/v1/signup/');
+    http.Response response = await http.post(url,
+        headers: {"Content-type": "application/json"}, body: json);
+
+    if (response.statusCode == 200) {
+      print(response.body);
+    } else {
+      print(response.statusCode);
+    }
   }
 
   Future<String?> signUp(String lastname, String firstname, String contact,
@@ -214,13 +229,32 @@ class SignUpForm extends StatelessWidget {
                       contactController.text.toString(),
                       passwordController.text.toString(),
                       confirmPasswordController.text.toString())
-                  .then((value) {
+                  .then((value) async {
                 print("------------------------------");
                 print(value);
                 if (value == null) {
                   print("Inscription echouée");
                 } else {
                   Map<String, dynamic> jsonUserData = jsonDecode(value);
+                  try {
+                    Uri url = Uri.parse(
+                        'http://devinspay.pythonanywhere.com/api/v1/signup/');
+                    http.Response response = await http.post(url,
+                        headers: {"Content-type": "application/json"},
+                        body: value);
+
+                    if (response.statusCode == 200) {
+                      var data = jsonDecode(response.body.toString());
+                      print(data);
+                      print(data['token']);
+                      print('Account created succefully');
+                    } else {
+                      print(response.statusCode);
+                      print('Failed');
+                    }
+                  } catch (e) {
+                    print(e.toString());
+                  }
 
                   Navigator.push(
                     context,

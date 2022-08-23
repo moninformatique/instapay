@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors, avoid_print, unused_local_variable, unnecessary_null_comparison, unused_import, prefer_interpolation_to_compose_strings
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
 import 'dart:collection';
 import 'dart:convert';
@@ -16,6 +17,18 @@ class LoginForm extends StatelessWidget {
   const LoginForm({
     Key? key,
   }) : super(key: key);
+
+  Future<void> getData() async {
+    //Méthode de requête à l'api
+    Uri url = Uri.parse("http://devinstapay.pythonanywhere.com/api/v1/login/");
+    http.Response response = await http.get(url);
+    if (response.statusCode == 200) {
+      print(response.body);
+      print("ok");
+    } else {
+      print(response.statusCode);
+    }
+  }
 
   Future<String?> signIn(String path) {
     print("1 - SIGN IN WITH ($path)");
@@ -147,6 +160,7 @@ class LoginForm extends StatelessWidget {
                   if (jsonUserData['password'].toString() ==
                       passwordHashed.toString()) {
                     print("5 - MOT DE PASSE IDENTIQUES ");
+                    getData();
                     startSession(contactController.text.toString());
                     print("6 - CONNEXION REUSSIE");
                     print("7 - OUVERTURE DE LA PAGE D'ACCUEIL");

@@ -1,16 +1,16 @@
-// ignore_for_file: must_be_immutable, avoid_print, prefer_const_constructors_in_immutables
+// ignore_for_file: must_be_immutable, avoid_print
 
 import 'package:flutter/material.dart';
-import 'components/constants.dart';
 import './Screens/Home/home_screen.dart';
 import './Screens/Welcome/welcome_screen.dart';
+import 'components/constants.dart';
 import 'dart:io';
 import 'dart:convert';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  MyApp({Key? key}) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   // This widget is the root of your application.
   @override
@@ -47,36 +47,38 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// ------------- Classe qui designera la page suivante ------------------ //
-
 class NextPage extends StatelessWidget {
   NextPage({Key? key}) : super(key: key);
 
-  // Préparation d'un variable qui contiien contiendra les donnée de l'utilisateur en format Json
   Map<String, dynamic> jsonUserData = jsonDecode("{}");
 
-  /*- checkIfUserLogged verifie si un utilisateur s'est connecté dernièrement
-      - Si OUI on charge ses données dans jsonUserData puis on lance la page principale
-      - si NON on lance la page de bienvenu invitant l'utilisateur à se connecter ou s'inscrire
-  */
   bool checkIfUserIsLogged() {
-    // le fichier .isLogged temoigne d'une connection établie par l'utilisateur encore existante
-    // Il contient le contact de l'utilisateur connecté
-    File file = File('./sessions/.islogged');
+    final usersDirectory = Directory("./users");
+    final sessionsDirectory = Directory("./sessions");
 
+    if (!usersDirectory.existsSync()) {
+      usersDirectory.createSync(recursive: true);
+    }
+    if (!sessionsDirectory.existsSync()) {
+      sessionsDirectory.createSync(recursive: true);
+    }
+
+    File file = File('./sessions/.islogged');
     // Tester si le fichier temoin d'une connexion existe
+    print(
+        "Teste de l'existence  du fichier temoin d'une connexion à l'application ");
     bool value = file.existsSync();
 
     if (value) {
-      // Si OUI
-      print("Un utilisateur est bel et bien connecté");
+      print("Le fichier temoin d'une connexion existe belle et bien");
+      // si oui, lire le contenu du fichier qui est son contact
 
-      //Recuperation du contact de l'utilisateur connecté à partir du fichier de connection
+      print("Extration du fichier temoin le contact de l'utilisateur connecté");
       File loginfile = File('./sessions/.islogged');
       String valueLoginfile = loginfile.readAsStringSync();
       print("Le contact de l'utilisateur connecté est : $valueLoginfile");
 
-      //Se servir du contact de l'utilisateur pour acceder à ses données
+      //se servir de son contact pour acceder aus données de l'utilisateur
       File userdatafile = File('./users/$valueLoginfile.json');
       print("Chargement des données de l'utilisateur à partir de son contact");
       String valueUserdata = userdatafile.readAsStringSync();
@@ -86,7 +88,6 @@ class NextPage extends StatelessWidget {
       print("Check if user is logged is TRUE");
       return true;
     } else {
-      // Si NON
       print("Check if user is logged is FALSE");
       return false;
     }
@@ -95,10 +96,11 @@ class NextPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (checkIfUserIsLogged()) {
-      // Si un utilisateur est cinnecté, lancer la page principale
+      print("*************TRUE***************");
+      print(jsonUserData["first_name"]);
       return MyHomePage(data: jsonUserData);
     } else {
-      // Si aucun utilisateur n'est connecté, lancer la page de bienvenue
+      print("****************FALSE***********");
       return const WelcomeScreen();
     }
   }
