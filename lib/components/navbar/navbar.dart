@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class NavBar extends StatelessWidget {
   //final Map<String, dynamic>? userData;
-  const NavBar({Key? key, required Map userData}) : super(key: key);
+  const NavBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

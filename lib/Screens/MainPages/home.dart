@@ -11,7 +11,7 @@ import '../../components/navbar/navbar.dart';
 
 class Home extends StatefulWidget {
   final Map<String, dynamic>? data;
-  const Home({Key? key, required this.data }) : super(key: key);
+  const Home({Key? key, required this.data}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
@@ -51,60 +51,13 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       //drawer: const NavBar(),
-      appBar: buildAppBar(),
+      //appBar: buildAppBar(),
       body: Column(
         children: <Widget>[
           appBarBottomSection(),
           mainBody(),
         ],
       ),
-    );
-  }
-
-  AppBar buildAppBar() {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: kPrimaryColor,
-      leading: const Padding(
-        padding: EdgeInsets.only(left: 20, top: 15),
-        child: Text(
-          "Anxowin",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
-            height: 1,
-          ),
-        ),
-      ),
-      leadingWidth: 500,
-      actions: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(right: 0),
-          child: IconButton(
-            onPressed: () {
-              print('Chargement de la page des notifications');
-              logout();
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return const WelcomeScreen();
-              }));
-            },
-            icon: const Icon(Icons.notifications),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 10),
-          child: IconButton(
-            onPressed: () {
-              print("Chargement du menu");
-            },
-            icon: Image.asset(
-              'assets/images/menu.png',
-              fit: BoxFit.fitWidth,
-            ),
-          ),
-        ),
-      ],
     );
   }
 

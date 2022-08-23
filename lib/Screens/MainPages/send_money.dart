@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print, prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import '../../components/constants.dart';
 
 class SendMoney extends StatefulWidget {
@@ -17,7 +18,6 @@ class _SendMoneyState extends State<SendMoney> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar(),
       body: Column(
         children: <Widget>[
           appBarBottomSection(),
@@ -27,45 +27,6 @@ class _SendMoneyState extends State<SendMoney> {
           mainBody(),
         ],
       ),
-    );
-  }
-
-  AppBar buildAppBar() {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: kPrimaryColor,
-      leading: const Padding(
-        padding: EdgeInsets.only(left: 20, top: 15),
-        child: Text(
-          "Envoyer",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 17,
-            fontWeight: FontWeight.w500,
-            height: 1,
-          ),
-        ),
-      ),
-      leadingWidth: 500,
-      actions: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(right: 0),
-          child: IconButton(
-            onPressed: () => print('Chargement de la page des notifications'),
-            icon: const Icon(Icons.notifications),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 10),
-          child: IconButton(
-            onPressed: () => print('Chargement du menu'),
-            icon: Image.asset(
-              'assets/images/menu.png',
-              fit: BoxFit.fitWidth,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -187,7 +148,19 @@ class _SendMoneyState extends State<SendMoney> {
                       Text("1599"),
                     ],
                   ),
-                  const SizedBox(height: defaultPadding * 4),
+                  const SizedBox(height: defaultPadding * 2),
+                  FloatingActionButton(
+                    backgroundColor: kPrimaryColor,
+                    onPressed: () {
+                      //Future<String> res =  FlutterBarcodeScanner.scanBarcode('#ffffff', 'retour', true, ScanMode.QR);
+                      //print(res);
+                    },
+                    child: const Icon(
+                      Icons.qr_code_scanner_outlined,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: defaultPadding * 2),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         vertical: defaultPadding,
