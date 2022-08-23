@@ -40,17 +40,11 @@ dependencies:
   image_cropper: ^1.2.1
   json_annotation: ^4.6.0
   json_serializable: ^6.3.1
-  modal_progress_hud_nsn: ^0.1.0-nullsafety-1
-  path_provider: ^1.6.5
+  modal_progress_hud_nsn: ^0.3.0
+  path_provider: ^2.0.11
   shared_preferences: ^2.0.15
 
 dev_dependencies:
-
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
   flutter_lints: ^2.0.1
   flutter_test:
     sdk: flutter
