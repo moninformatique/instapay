@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../../components/constants.dart';
 
 class UserProfil extends StatelessWidget {
-  const UserProfil({Key? key}) : super(key: key);
+  final Map<String, dynamic>? data;
+  const UserProfil({Key? key, required this.data}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -66,10 +67,10 @@ class UserProfil extends StatelessWidget {
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Text(
-                      "Ahin ",
-                      style: TextStyle(color: Colors.black, fontSize: 18),
+                      data!["last_name"],
+                      style: const TextStyle(color: Colors.black, fontSize: 18),
                     )
                   ],
                 ),
@@ -105,10 +106,10 @@ class UserProfil extends StatelessWidget {
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Text(
-                      "Manglé Eic Axel ",
-                      style: TextStyle(color: Colors.black, fontSize: 18),
+                      data!["first_name"],
+                      style: const TextStyle(color: Colors.black, fontSize: 18),
                     )
                   ],
                 ),
@@ -144,10 +145,10 @@ class UserProfil extends StatelessWidget {
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Text(
-                      "0123456789",
-                      style: TextStyle(color: Colors.black, fontSize: 18),
+                      data!["contact"],
+                      style: const TextStyle(color: Colors.black, fontSize: 18),
                     )
                   ],
                 ),
