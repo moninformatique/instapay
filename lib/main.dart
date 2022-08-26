@@ -95,6 +95,7 @@ class NextPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //bool varTest = false;
     if (checkIfUserIsLogged()) {
       print("*************TRUE***************");
       print(jsonUserData["first_name"]);

@@ -227,8 +227,10 @@ class _MyHomePageState extends State<MyHomePage> {
           onSelected: (value) {
             switch (value) {
               case "profil":
-                Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => UserProfil()));
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => UserProfil(
+                          data: widget.data,
+                        )));
                 break;
               case "invite":
                 print("Invit your friend");
