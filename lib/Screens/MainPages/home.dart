@@ -5,9 +5,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'component/model.dart';
-import '../Welcome/welcome_screen.dart';
 import '../../components/constants.dart';
-import '../../components/navbar/navbar.dart';
 
 class Home extends StatefulWidget {
   final Map<String, dynamic>? data;
@@ -18,17 +16,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  Future<int> logout() async {
-    try {
-      File sessionUser = File('./sessions/.islogged');
-      await sessionUser.delete();
-      return 1;
-    } catch (e) {
-      print(e);
-      return 0;
-    }
-  }
-
   List<AmountModel> amountList = [
     const AmountModel(
       icon: Icons.currency_franc,
@@ -50,8 +37,6 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //drawer: const NavBar(),
-      //appBar: buildAppBar(),
       body: Column(
         children: <Widget>[
           appBarBottomSection(),
@@ -78,10 +63,8 @@ class _HomeState extends State<Home> {
             height: 50,
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 50),
             height: 200,
             width: MediaQuery.of(context).size.width,
-            //color: kSecondaryColor,
             decoration: BoxDecoration(
               color: kSecondaryColor,
               borderRadius: BorderRadius.circular(30),
@@ -102,7 +85,7 @@ class _HomeState extends State<Home> {
                   'Vous disposez de',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.8),
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.w500,
                     height: 1,
                   ),
@@ -133,19 +116,6 @@ class _HomeState extends State<Home> {
                     ),
                   ],
                 ),
-
-                /*
-                SizedBox(
-                  height: 150,
-                  width: 250,
-                  child: Expanded(
-                    flex: 50,
-                    child: QrcodeContainer(
-                      data: "mail.anxowin@instapay.com",
-                    ),
-                  ),
-                ),
-                */
               ],
             ),
           ),

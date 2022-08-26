@@ -1,18 +1,16 @@
-// ignore_for_file: unused_field, prefer_const_literals_to_create_immutables, prefer_const_constructors, prefer_interpolation_to_compose_strings, avoid_print
+// ignore_for_file: avoid_print
 
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import '../../components/constants.dart';
 import '../User/profile.dart';
 import '../About/about.dart';
 import '../Welcome/welcome_screen.dart';
-import 'component/test.dart';
-import '../MainPages/receive_money.dart';
-import '../MainPages/send_money.dart';
-import '../../components/constants.dart';
 
 import '../MainPages/home.dart';
 import '../MainPages/transaction.dart';
+import '../MainPages/send_money.dart';
+import '../MainPages/receive_money.dart';
 
 class MyHomePage extends StatefulWidget {
   final Map<String, dynamic>? data;
@@ -29,29 +27,27 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     List<Widget> screens = [
       Home(data: widget.data),
-      Transaction(),
-      SendMoney(),
+      const Transaction(),
+      const SendMoney(),
       ReceiveMoney(
         userContact: widget.data!['contact'],
       ),
     ];
-    List<String> titre = [
-      widget.data!["contact"],
+    List<String> titles = [
+      widget.data!['contact'],
       "Transactions",
       "Envoyer",
       "Recevoir"
     ];
 
     return Scaffold(
-      appBar: buildAppBar(titre[_selectedIndex]),
+      appBar: buildAppBar(titles[_selectedIndex]),
       body: screens[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: Color(0xFF501CE2),
         ),
         child: BottomAppBar(
-          //elevation: 0,
-          //color: Colors.transparent,
           child: SizedBox(
             height: 56,
             width: MediaQuery.of(context).size.width,
@@ -103,7 +99,6 @@ class _MyHomePageState extends State<MyHomePage> {
                           setState(() {
                             _selectedIndex = 3;
                           });
-                          Test();
                         }),
                   ]),
             ),
@@ -117,7 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Future<int> logout() async {
       try {
         File sessionUser = File('./sessions/.islogged');
-        await sessionUser.delete();
+        sessionUser.deleteSync();
         return 1;
       } catch (e) {
         print(e);
@@ -129,13 +124,13 @@ class _MyHomePageState extends State<MyHomePage> {
       elevation: 0,
       backgroundColor: kPrimaryColor,
       leading: Padding(
-        padding: EdgeInsets.only(left: 20, top: 15),
+        padding: const EdgeInsets.only(left: 20, top: 15),
         child: Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
             height: 1,
           ),
         ),
@@ -147,12 +142,6 @@ class _MyHomePageState extends State<MyHomePage> {
           child: IconButton(
             onPressed: () {
               print('Chargement de la page des notifications');
-              /*
-              logout();
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return const WelcomeScreen();
-              }));
-              */
             },
             icon: const Icon(Icons.notifications),
           ),
@@ -166,13 +155,13 @@ class _MyHomePageState extends State<MyHomePage> {
             PopupMenuItem(
               value: "profil",
               child: Row(
-                children: [
+                children: const [
                   Icon(
                     Icons.person,
                     color: kSecondaryColor,
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(left: defaultPadding),
+                    padding: EdgeInsets.only(left: defaultPadding),
                     child: Text("Mon profile"),
                   ),
                 ],
@@ -181,13 +170,13 @@ class _MyHomePageState extends State<MyHomePage> {
             PopupMenuItem(
               value: "invite",
               child: Row(
-                children: [
+                children: const [
                   Icon(
                     Icons.share,
                     color: kSecondaryColor,
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(left: defaultPadding),
+                    padding: EdgeInsets.only(left: defaultPadding),
                     child: Text("Inviter un ami"),
                   ),
                 ],
@@ -196,13 +185,13 @@ class _MyHomePageState extends State<MyHomePage> {
             PopupMenuItem(
               value: "about",
               child: Row(
-                children: [
+                children: const [
                   Icon(
                     Icons.info,
                     color: kSecondaryColor,
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(left: defaultPadding),
+                    padding: EdgeInsets.only(left: defaultPadding),
                     child: Text("A propos"),
                   ),
                 ],
@@ -211,14 +200,14 @@ class _MyHomePageState extends State<MyHomePage> {
             PopupMenuItem(
               value: "logout",
               child: Row(
-                children: [
+                children: const [
                   Icon(
                     Icons.logout,
                     color: kSecondaryColor,
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(left: defaultPadding),
-                    child: Text("Se deconecter"),
+                    padding: EdgeInsets.only(left: defaultPadding),
+                    child: Text("Se déconecter"),
                   ),
                 ],
               ),
@@ -233,11 +222,11 @@ class _MyHomePageState extends State<MyHomePage> {
                         )));
                 break;
               case "invite":
-                print("Invit your friend");
+                print("Inviter un ami");
                 break;
               case "about":
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) => AboutPage()));
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const AboutPage()));
                 break;
               case "logout":
                 logout();
@@ -278,7 +267,7 @@ class IconBottomBar extends StatelessWidget {
           icon: Icon(icon,
               size: 25, color: (selected) ? kSecondaryColor : Colors.grey),
         ),
-        SizedBox(
+        const SizedBox(
           height: 5,
         ),
         Text(

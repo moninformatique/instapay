@@ -1,11 +1,10 @@
-// ignore_for_file: prefer_const_constructors, avoid_print, unused_local_variable, unnecessary_null_comparison, unused_import, prefer_interpolation_to_compose_strings
+// ignore_for_file: avoid_print
 
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
-import 'dart:collection';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+//import 'package:crypto/crypto.dart';
 import 'dart:convert';
-import 'dart:async';
 import 'dart:io';
 
 import '../../../components/already_have_an_account_acheck.dart';
@@ -18,82 +17,70 @@ class LoginForm extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
-  Future<void> getData() async {
-    //Méthode de requête à l'api
-    Uri url = Uri.parse("http://devinstapay.pythonanywhere.com/api/v1/login/");
-    http.Response response = await http.get(url);
-    if (response.statusCode == 200) {
-      print(response.body);
-      print("ok");
-    } else {
-      print(response.statusCode);
-    }
-  }
+  Future<String> signIn(String contact, password) async {
+    print("Exécution de la fonction de connexion ");
 
-  Future<String?> signIn(String path) {
-    print("1 - SIGN IN WITH ($path)");
-    File file = File(path);
-    //bool check = file.exists() as bool;
-    final contents = file.readAsString();
-    return contents;
-  }
-
-  Future<String?> readuserFile(String path) async {
-    print("READ USER FILE");
-    print("Chargement, du compte");
-    print(path);
+    print("Hashage du mot de passe");
+    var encodePassword = utf8.encode(password);
+    Digest hashpwd = sha256.convert(encodePassword);
+    password = hashpwd.toString();
 
     try {
-      File file = File(path);
+      print("Tentative d'une connexion");
+      Response response = await post(
+          Uri.parse('http://devinstapay.pythonanywhere.com/api/v1/login/'),
+          body: jsonEncode(
+              <String, String>{"contact": contact, "password": password}),
+          headers: <String, String>{"Content-Type": "application/json"});
 
-      // Read the file
-      final contents = await file.readAsString();
-      print("(read user file) Contenu du compte est : ");
-      String texte = contents.toString();
-      print(texte);
-      return contents;
-    } catch (e) {
-      print("Error");
-      print(e.toString());
-      return null;
-    }
-  }
+      print("Code de la reponse : [${response.statusCode}]");
+      print("Contenue de la reponse : ${response.body}");
+      //String content = response.body.toString();
+      //file.writeAsStringSync(content);
 
-  Future<File?> startSession(String user) async {
-    String isloggedPath = './sessions/.islogged';
-    String sessionUserPath = './sessions/$user.json';
-    DateTime today = DateTime.now();
-    String lastSession = today.toString();
-    String sessionData =
-        '{\n\t"user" : "$user",\n\t"lastSession" : "$lastSession"\n}';
-
-    File sessionUser = File(sessionUserPath);
-    sessionUser.writeAsString(sessionData);
-
-    try {
-      File login = File(isloggedPath);
-
-      return login.writeAsString(user);
-    } catch (e) {
-      print("Error");
-      print(e.toString());
-      return null;
-    }
-  }
-
-  String? checkIfUserExist(String path) {
-    print("CHECK IF USER EXIST");
-    readuserFile(path).then((value) {
-      print("(check if user exist) Contenu du compte est : ");
-      print(value);
-      if (value != null) {
-        print("on retourne le contenu du compte ");
-        return value;
+      if (response.statusCode == 200) {
+        print("La connexion à été éffectué");
+        startSession(contact);
+        String data = response.body.toString();
+        //String data = signInLocal(contact);
+        return data;
       } else {
-        return null;
+        print("La connexion à échoué");
+        return "fail";
       }
-    });
-    return null;
+    } catch (e) {
+      print(e.toString());
+      return "fail";
+    }
+  }
+
+  String signInLocal(String contact) {
+    print("SIGN IN LOCAL");
+    String path = "./users/$contact.json";
+    File file = File(path);
+    bool theUserExsist = file.existsSync();
+
+    if (theUserExsist) {
+      String contents = file.readAsStringSync();
+      return contents;
+    } else {
+      return "";
+    }
+  }
+
+  void startSession(String contact) {
+    String isloggedPath = './sessions/.islogged';
+    String sessionUserPath = './sessions/$contact.json';
+
+    File isLoggedFile = File(isloggedPath);
+    File userSessionFile = File(sessionUserPath);
+
+    String lastUserSession = DateTime.now().toString();
+    String sessionData =
+        '{\n\t"contact" : "$contact",\n\t"lastSession" : "$lastUserSession"\n}';
+
+    userSessionFile.writeAsStringSync(sessionData);
+    isLoggedFile.writeAsStringSync(contact);
   }
 
   @override
@@ -108,10 +95,10 @@ class LoginForm extends StatelessWidget {
             textInputAction: TextInputAction.next,
             cursorColor: kPrimaryColor,
             //onSaved: (email) {},
-            decoration: InputDecoration(
-              hintText: "Numero de téléphone",
+            decoration: const InputDecoration(
+              hintText: "Email ou Numéro",
               prefixIcon: Padding(
-                padding: const EdgeInsets.all(defaultPadding),
+                padding: EdgeInsets.all(defaultPadding),
                 child: Icon(Icons.contact_phone),
               ),
             ),
@@ -123,10 +110,10 @@ class LoginForm extends StatelessWidget {
               textInputAction: TextInputAction.done,
               obscureText: true,
               cursorColor: kPrimaryColor,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: "Mot de passe",
                 prefixIcon: Padding(
-                  padding: const EdgeInsets.all(defaultPadding),
+                  padding: EdgeInsets.all(defaultPadding),
                   child: Icon(Icons.lock),
                 ),
               ),
@@ -137,52 +124,36 @@ class LoginForm extends StatelessWidget {
             tag: "login_btn",
             child: ElevatedButton(
               onPressed: () {
-                signIn('./users/${contactController.text}.json'.toString())
-                    .then((value) {
-                  print("2 - RECEPTION DES DONNEES ");
-                  print(value);
-                  print("3 - CONVERSION DES DONNEES EN OBJET JSON");
-                  Map<String, dynamic> jsonUserData = jsonDecode(value!);
-                  print("4 - COMPARAISON DES MOTS DE PASSE ");
-                  print(
-                      "Mot de passe enregistré : " + jsonUserData['password']);
+                if (contactController.text.toString().isNotEmpty &&
+                    passwordController.text.toString().isNotEmpty) {
+                  signIn(contactController.text.toString(),
+                          passwordController.text.toString())
+                      .then((value) {
+                    if (value == "fail") {
+                      print("Connexion echouée");
+                    } else {
+                      String userData =
+                          '{"first_name":"firstname" , "last_name":"lastname","contact":"001122334455","password":"passwordHashed"}';
+                      Map<String, dynamic> jsonUserData = jsonDecode(userData);
 
-                  String password = passwordController.text.toString();
-                  var encodePassword = utf8.encode(password);
-                  Digest hashpwd = sha256.convert(encodePassword);
-                  String passwordHashed = hashpwd.toString();
-                  print("Mot de passe renseigné : $password");
-                  print("Hash du mot de passe renseigné" +
-                      passwordHashed.toString() +
-                      "****");
-                  print("Hash du mot de passe inscrit : " +
-                      jsonUserData['password']);
-                  if (jsonUserData['password'].toString() ==
-                      passwordHashed.toString()) {
-                    print("5 - MOT DE PASSE IDENTIQUES ");
-                    getData();
-                    startSession(contactController.text.toString());
-                    print("6 - CONNEXION REUSSIE");
-                    print("7 - OUVERTURE DE LA PAGE D'ACCUEIL");
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return MyHomePage(
-                            data: jsonUserData,
-                          );
-                        },
-                      ),
-                    );
-                  } else {
-                    print("5 - MOT DE PASSE DIFFÉRENTS");
-                    print("6 - CONNEXION ECHOUEE");
-                  }
-                }).catchError((onError) {
-                  print("ERREUR SURVENUE !!!");
-                  print(onError);
-                });
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return MyHomePage(
+                              data: jsonUserData,
+                            );
+                          },
+                        ),
+                      );
+                    }
+                  }).catchError((e) {
+                    print("Une erreur est survenue !");
+                    print(e);
+                  });
+                } else {
+                  print("Remplissez tous les champ s'il vous plait !");
+                }
               },
               child: Text(
                 "Connexion".toUpperCase(),
@@ -190,18 +161,6 @@ class LoginForm extends StatelessWidget {
             ),
           ),
           const SizedBox(height: defaultPadding),
-          TextButton(
-            onPressed: () {
-              print("Chargement du formulaire de recupération de mot de passe");
-            },
-            child: Text(
-              "Mot de passe oublié ?",
-              style: const TextStyle(
-                color: kPrimaryColor,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
           const SizedBox(height: defaultPadding),
           AlreadyHaveAnAccountCheck(
             onPress: () {
@@ -209,7 +168,7 @@ class LoginForm extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) {
-                    return SignUpScreen();
+                    return const SignUpScreen();
                   },
                 ),
               );

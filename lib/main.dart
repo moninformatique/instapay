@@ -85,6 +85,7 @@ class NextPage extends StatelessWidget {
       print("Les données de l'utilisateur connecté : $valueUserdata");
 
       jsonUserData = jsonDecode(valueUserdata);
+      jsonUserData = jsonUserData["data"][0];
       print("Check if user is logged is TRUE");
       return true;
     } else {
@@ -98,6 +99,7 @@ class NextPage extends StatelessWidget {
     //bool varTest = false;
     if (checkIfUserIsLogged()) {
       print("*************TRUE***************");
+      print(jsonUserData);
       print(jsonUserData["first_name"]);
       return MyHomePage(data: jsonUserData);
     } else {

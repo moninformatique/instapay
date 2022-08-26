@@ -1,8 +1,8 @@
 // ignore_for_file: avoid_print
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart';
+//import 'package:http/http.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
@@ -12,36 +12,6 @@ import '../../../components/constants.dart';
 import '../../Login/login_screen.dart';
 import '../../Home/home_screen.dart';
 
-/*
-  // UNE CLASS QUI CONTIENT LES FONCTION DE LECTURE ET D'ECRITURE DANS UN FICHIER
-class FileStorage {
-  String path = '';
-  String data = '';
-  FileStorage(String path, String data);
-
-  Future<String> readFile() async {
-    try {
-      final file = File(path);
-
-      // Read the file
-      final contents = await file.readAsString();
-
-      return contents;
-    } catch (e) {
-      // If encountering an error, return 0
-      return 'Error';
-    }
-  }
-
-  Future<File> writeFile(String path, String data) async {
-    final file = File(path);
-
-    // Write the file
-    return file.writeAsString(data);
-  }
-  
-}
-*/
 class SignUpForm extends StatelessWidget {
   const SignUpForm({
     Key? key,
@@ -49,87 +19,68 @@ class SignUpForm extends StatelessWidget {
 
   final int pageIndex = 0;
 
-  Future<File> saveAccount(String path, String data, String user) async {
-    File file = File(path);
-    File login = File('./sessions/.islogged');
-    File session = File('./sessions/$user.json');
+  void startSession(String contact) {
+    String isloggedPath = './sessions/.islogged';
+    String sessionUserPath = './sessions/$contact.json';
 
-    DateTime today = DateTime.now();
-    String lastSession = today.toString();
+    File isLoggedFile = File(isloggedPath);
+    File userSessionFile = File(sessionUserPath);
+
+    String lastUserSession = DateTime.now().toString();
     String sessionData =
-        '{\n\t"user" : "$user",\n\t"lastSession" : "$lastSession"\n}';
+        '{\n\t"contact" : "$contact",\n\t"lastSession" : "$lastUserSession"\n}';
 
-    login.writeAsString(user);
-    session.writeAsString(sessionData);
-    print("Sauvegarde du compte");
-    return file.writeAsString(data);
+    userSessionFile.writeAsStringSync(sessionData);
+    isLoggedFile.writeAsStringSync(contact);
   }
 
-  Future send(var json) async {
-    //Méthode d'envoie vers l'API
-    Uri url = Uri.parse('http://devinspay.pythonanywhere.com/api/v1/signup/');
-    http.Response response = await http.post(url,
-        headers: {"Content-type": "application/json"}, body: json);
-
-    if (response.statusCode == 200) {
-      print(response.body);
-    } else {
-      print(response.statusCode);
-    }
+  void saveAccount(String data, contact) {
+    File userInfo = File("./users/$contact.json");
+    userInfo.writeAsStringSync(data);
   }
 
-  Future<String?> signUp(String lastname, String firstname, String contact,
-      String password, String confirmpassword) async {
-    print("Lastname : $lastname");
-    print("Firstname :$firstname");
-    print("Contact : $contact");
-    print("Password :$password");
-    print("Confirm Password : $confirmpassword");
+  Future<String> signUp(String firstname, String lastname, String contact,
+      String password) async {
+    print("Exécution de la fonction d'inscription ");
 
-    if (lastname.isNotEmpty &&
-        firstname.isNotEmpty &&
-        contact.isNotEmpty &&
-        password.isNotEmpty &&
-        confirmpassword.isNotEmpty) {
-      if (password == confirmpassword) {
-        print("Hashage du mot de passe");
-        var encodePassword = utf8.encode(password);
-        print(encodePassword.toString());
+    print("Hashage du mot de passe");
+    var encodePassword = utf8.encode(password);
+    Digest hashpwd = sha256.convert(encodePassword);
+    password = hashpwd.toString();
 
-        Digest hashpwd = sha256.convert(encodePassword);
-        String passwordHashed = hashpwd.toString();
-        print(passwordHashed);
-        String data =
-            '{\n\t"first_name":"$firstname",\n\t"last_name":"$lastname",\n\t"contact":"$contact",\n\t"password":"$passwordHashed"\n}';
-        String path = './users/$contact.json';
-        saveAccount(path, data, contact);
-        return data;
-      } else {
-        return null;
-      }
-    } else {
-      return null;
-    }
-
-    /*
     try {
-      //https://reqres.in/api/register
+      print("Tentative d'inscription");
       Response response = await post(
-          Uri.parse('http://devinstapay/pythonanywhere.com/api/v1/signup'),
-          body: data);
+          Uri.parse('http://devinstapay.pythonanywhere.com/api/v1/signup/'),
+          body: jsonEncode(<String, String>{
+            "first_name": firstname,
+            "last_name": lastname,
+            "contact": contact,
+            "password": password
+          }),
+          headers: <String, String>{"Content-Type": "application/json"});
 
+      print("requete envoyé 1");
+      print("Code de la reponse : [${response.statusCode}]");
+      print("Contenue de la reponse : ${response.body}");
+
+      print("requete envoyé 1");
       if (response.statusCode == 200) {
-        var data = jsonDecode(response.body.toString());
-        print(data);
-        print(data['token']);
-        print('Account created succefully');
+        print("L'inscription à été éffectué");
+
+        startSession(contact);
+        saveAccount(response.body.toString(), contact);
+
+        return response.body.toString();
       } else {
-        print('Failed');
+        print("L'inscription à échouée");
+        return "fail";
       }
     } catch (e) {
+      print("Une ereur est survenue");
       print(e.toString());
+      return "fail";
     }
-    */
   }
 
   @override
@@ -223,51 +174,45 @@ class SignUpForm extends StatelessWidget {
           const SizedBox(height: defaultPadding / 2),
           ElevatedButton(
             onPressed: () {
-              signUp(
-                      lastNameController.text.toString(),
-                      firstNameController.text.toString(),
-                      contactController.text.toString(),
-                      passwordController.text.toString(),
-                      confirmPasswordController.text.toString())
-                  .then((value) async {
-                print("------------------------------");
-                print(value);
-                if (value == null) {
-                  print("Inscription echouée");
-                } else {
-                  Map<String, dynamic> jsonUserData = jsonDecode(value);
-                  try {
-                    Uri url = Uri.parse(
-                        'http://devinspay.pythonanywhere.com/api/v1/signup/');
-                    http.Response response = await http.post(url,
-                        headers: {"Content-type": "application/json"},
-                        body: value);
-
-                    if (response.statusCode == 200) {
-                      var data = jsonDecode(response.body.toString());
-                      print(data);
-                      print(data['token']);
-                      print('Account created succefully');
+              if (passwordController.text.toString() ==
+                  confirmPasswordController.text.toString()) {
+                if (firstNameController.text.toString().isNotEmpty &&
+                    lastNameController.text.toString().isNotEmpty &&
+                    contactController.text.toString().isNotEmpty &&
+                    passwordController.text.toString().isNotEmpty &&
+                    confirmPasswordController.text.toString().isNotEmpty) {
+                  signUp(
+                          firstNameController.text.toString(),
+                          lastNameController.text.toString(),
+                          contactController.text.toString(),
+                          passwordController.text.toString())
+                      .then((value) {
+                    if (value == "fail") {
+                      print("l'inscription a echouée");
                     } else {
-                      print(response.statusCode);
-                      print('Failed');
-                    }
-                  } catch (e) {
-                    print(e.toString());
-                  }
+                      Map<String, dynamic> jsonUserData = jsonDecode(value);
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return MyHomePage(
-                          data: jsonUserData,
-                        );
-                      },
-                    ),
-                  );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return MyHomePage(
+                              data: jsonUserData["data"][0],
+                            );
+                          },
+                        ),
+                      );
+                    }
+                  }).catchError((e) {
+                    print("Une erreur est survenue !");
+                    print(e);
+                  });
+                } else {
+                  print("Assurez vous de remplir tous les champs");
                 }
-              });
+              } else {
+                print("Mot de passe différents");
+              }
             },
             child: Text("Inscription".toUpperCase()),
           ),

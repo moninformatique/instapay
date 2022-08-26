@@ -1,15 +1,47 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import '../../components/constants.dart';
 
 class UserProfil extends StatelessWidget {
   final Map<String, dynamic>? data;
   const UserProfil({Key? key, required this.data}) : super(key: key);
 
+  void changePassword(String userId, oldPassword, newPassword) async {
+    try {
+      print("Tentative de changement de mot de passe");
+
+      Response response = await post(
+          Uri.parse(
+              'http://devinstapay.pythonanywhere.com/api/v1/change_password/'),
+          body: jsonEncode(<String, String>{
+            "user_id": userId,
+            "old_password": oldPassword,
+            "new_password": newPassword
+          }),
+          headers: <String, String>{"Content-Type": "application/json"});
+
+      print("Code de la reponse : [${response.statusCode}]");
+      print("Contenue de la reponse : ${response.body}");
+      //String content = response.body.toString();
+      //file.writeAsStringSync(content);
+
+      if (response.statusCode == 200) {
+        print("Le changement du mot de passe a été éffectué");
+      } else {
+        print("le changement de mot de passe a échoué");
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     TextEditingController newPasswordController = TextEditingController();
-    TextEditingController confirmNewPasswordController =
-        TextEditingController();
+    TextEditingController oldPasswordController = TextEditingController();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: kPrimaryColor,
@@ -24,11 +56,11 @@ class UserProfil extends StatelessWidget {
                 height: 100,
               ),
               Text(
-                "AHIN AXEL",
+                "Informations personnelles",
                 style: TextStyle(
                   color: Colors.black,
-                  fontSize: 30,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                   height: 0.9,
                 ),
               ),
@@ -173,7 +205,7 @@ class UserProfil extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: defaultPadding * 2),
             child: TextFormField(
-              controller: newPasswordController,
+              controller: oldPasswordController,
               textInputAction: TextInputAction.next,
               obscureText: true,
               cursorColor: kPrimaryColor,
@@ -194,7 +226,7 @@ class UserProfil extends StatelessWidget {
             padding: const EdgeInsets.symmetric(
                 vertical: defaultPadding, horizontal: defaultPadding * 2),
             child: TextFormField(
-              controller: confirmNewPasswordController,
+              controller: newPasswordController,
               textInputAction: TextInputAction.done,
               //obscureText: true,
               cursorColor: kPrimaryColor,
@@ -211,11 +243,35 @@ class UserProfil extends StatelessWidget {
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+                vertical: defaultPadding, horizontal: defaultPadding * 3),
+            child: ElevatedButton(
+              onPressed: () {
+                print("Hashage du mot de passe");
+                var encodeOldPassword = utf8.encode(oldPasswordController.text);
+                var encodeNewPassword = utf8.encode(newPasswordController.text);
+
+                String hashOldPassword =
+                    sha256.convert(encodeOldPassword).toString();
+                String hashNewPassword =
+                    sha256.convert(encodeNewPassword).toString();
+                print("user ID : ${data!["user_id"]} ");
+                print("Old : $hashOldPassword");
+                print("new : $hashNewPassword");
+                changePassword(
+                    data!["user_id"], hashOldPassword, hashNewPassword);
+              },
+              child: const Text(
+                "Valider",
+              ),
+            ),
+          ),
           const Spacer(),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
-              Text("Confirmer le fial essu"),
+              Text("Instapay, pour des transactions sécurisées"),
             ],
           ),
           const Spacer(),

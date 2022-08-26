@@ -151,9 +151,9 @@ class _SendMoneyState extends State<SendMoney> {
                   const SizedBox(height: defaultPadding * 2),
                   FloatingActionButton(
                     backgroundColor: kPrimaryColor,
-                    onPressed: () {
-                      //Future<String> res =  FlutterBarcodeScanner.scanBarcode('#ffffff', 'retour', true, ScanMode.QR);
-                      //print(res);
+                    onPressed: () async {
+                    String response = await FlutterBarcodeScanner.scanBarcode('#ffffff', 'retour', true, ScanMode.QR);
+                    print(response);
                     },
                     child: const Icon(
                       Icons.qr_code_scanner_outlined,
