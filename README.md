@@ -1,10 +1,10 @@
-# instapay_master
+# instapay
 
-A new Flutter project.
+Instapay est une application de payement en ligne, simple et sécurisé pour vos transactions en ligne, d'avec vos compte bancaire et même vos comptee mobile moeney.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+ce projet à été dévélopé avec Flutter et Django.
 
 A few resources to get you started if this is your first Flutter project:
 
