@@ -5,7 +5,8 @@ import '../../components/constants.dart';
 import 'component/model.dart';
 
 class Transaction extends StatefulWidget {
-  const Transaction({Key? key}) : super(key: key);
+  final String solde;
+  const Transaction({Key? key, required this.solde}) : super(key: key);
 
   @override
   State<Transaction> createState() => _TransactionState();
@@ -17,61 +18,61 @@ class _TransactionState extends State<Transaction> {
       icon: Icons.call_received,
       name: "Kouassi Ezechiel",
       date: '26/08/2022 - 21:05',
-      amount: '10,000',
+      amount: '---------',
     ),
     const TransactionModel(
       icon: Icons.call_received,
       name: "Kienou Chris",
       date: '20/08/2022 - 10:05',
-      amount: '60.000',
+      amount: '---------',
     ),
     const TransactionModel(
       icon: Icons.call_made,
       name: "Ballo Seydou",
       date: '20/08/2022 - 7:32',
-      amount: '-5,000',
+      amount: '---------',
     ),
     const TransactionModel(
       icon: Icons.call_received,
       name: "Nade Fabrice",
       date: '15/08/2022 - 12:04',
-      amount: '15,000',
+      amount: '---------',
     ),
     const TransactionModel(
       icon: Icons.call_received,
       name: "Coulibaly Karim",
       date: '16/08/2022 - 13:59',
-      amount: '10,000',
+      amount: '---------',
     ),
     const TransactionModel(
       icon: Icons.call_made,
       name: "Kaddy Kaddy",
       date: '22/07/2022 - 21:05',
-      amount: '-10,000',
+      amount: '---------',
     ),
     const TransactionModel(
       icon: Icons.call_received,
       name: "Soumahoro keh",
       date: '01/02/2022 - 8:10',
-      amount: '500,000',
+      amount: '---------',
     ),
     const TransactionModel(
       icon: Icons.call_received,
       name: "Mambe moïse",
       date: '26/01/2022 - 9:3',
-      amount: '70,000',
+      amount: '---------',
     ),
     const TransactionModel(
       icon: Icons.call_received,
       name: "Kessy Salomon",
       date: '26/01/2022 - 20:05',
-      amount: '1,000,000',
+      amount: '---------',
     ),
     const TransactionModel(
       icon: Icons.call_received,
       name: "Ouattara Kader",
       date: '10/01/2022 - 19:30',
-      amount: '10,000',
+      amount: '---------',
     ),
   ];
   @override
@@ -160,17 +161,17 @@ class _TransactionState extends State<Transaction> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const <Widget>[
+            children: <Widget>[
               Text(
-                '1,600,000',
-                style: TextStyle(
+                widget.solde,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 25,
                   fontWeight: FontWeight.w600,
                   height: 0.9,
                 ),
               ),
-              Text(
+              const Text(
                 ' Fcfa',
                 style: TextStyle(
                   color: Colors.white,

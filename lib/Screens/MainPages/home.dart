@@ -9,31 +9,15 @@ import '../../components/constants.dart';
 
 class Home extends StatefulWidget {
   final Map<String, dynamic>? data;
-  const Home({Key? key, required this.data}) : super(key: key);
+  final String solde;
+  const Home({Key? key, required this.data, required this.solde})
+      : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  List<AmountModel> amountList = [
-    const AmountModel(
-      icon: Icons.currency_franc,
-      title: "Fonds disponible",
-      amount: '1,600,000 Fcfa',
-    ),
-    const AmountModel(
-      icon: Icons.send,
-      title: "Somme transférée",
-      amount: '25,000 Fcfa',
-    ),
-    const AmountModel(
-      icon: Icons.currency_exchange,
-      title: "Somme réçu",
-      amount: '1,625,000 Fcfa',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,17 +79,17 @@ class _HomeState extends State<Home> {
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Text(
-                      '1,600,000',
-                      style: TextStyle(
+                      widget.solde,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 30,
                         fontWeight: FontWeight.w600,
                         height: 0.9,
                       ),
                     ),
-                    Text(
+                    const Text(
                       ' Fcfa',
                       style: TextStyle(
                         color: Colors.white,
@@ -128,6 +112,23 @@ class _HomeState extends State<Home> {
   }
 
   Expanded mainBody() {
+    List<AmountModel> amountList = [
+      AmountModel(
+        icon: Icons.currency_franc,
+        title: "Fonds disponible",
+        amount: widget.solde,
+      ),
+      const AmountModel(
+        icon: Icons.send,
+        title: "Somme transférée",
+        amount: '-------- Fcfa',
+      ),
+      const AmountModel(
+        icon: Icons.currency_exchange,
+        title: "Somme réçu",
+        amount: '-------- Fcfa',
+      ),
+    ];
     return Expanded(
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),

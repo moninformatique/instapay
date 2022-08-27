@@ -50,15 +50,15 @@ class SignUpForm extends StatelessWidget {
 
     try {
       print("Tentative d'inscription");
-      Response response = await post(
-          Uri.parse('http://devinstapay.pythonanywhere.com/api/v1/signup/'),
-          body: jsonEncode(<String, String>{
-            "first_name": firstname,
-            "last_name": lastname,
-            "contact": contact,
-            "password": password
-          }),
-          headers: <String, String>{"Content-Type": "application/json"});
+      Response response =
+          await post(Uri.parse('http://164.92.134.116/api/v1/signup/'),
+              body: jsonEncode(<String, String>{
+                "first_name": firstname,
+                "last_name": lastname,
+                "contact": contact,
+                "password": password
+              }),
+              headers: <String, String>{"Content-Type": "application/json"});
 
       print("requete envoyé 1");
       print("Code de la reponse : [${response.statusCode}]");

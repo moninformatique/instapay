@@ -1,7 +1,9 @@
 // ignore_for_file: avoid_print
 
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import '../../components/constants.dart';
 import '../User/profile.dart';
 import '../About/about.dart';
@@ -13,8 +15,10 @@ import '../MainPages/send_money.dart';
 import '../MainPages/receive_money.dart';
 
 class MyHomePage extends StatefulWidget {
-  final Map<String, dynamic>? data;
-  const MyHomePage({Key? key, required this.data}) : super(key: key);
+  final Map<String, dynamic> data;
+  late Map<String, dynamic> userAccountData = jsonDecode("{}");
+
+  MyHomePage({Key? key, required this.data}) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -23,18 +27,59 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
+  String mysolde = "";
+
+  void accountRequest(String userID) async {
+    Map<String, dynamic> account = jsonDecode("{}");
+    try {
+      print("Tentative de recupération des infos solde");
+      Response response = await get(Uri.parse(
+          'http://164.92.134.116/api/v1/users/$userID/accounts/'));
+
+      print("Code de la reponse : [${response.statusCode}]");
+      print("Contenue de la reponse : ${response.body}");
+
+      if (response.statusCode == 200) {
+        String userAccountData = response.body.toString();
+        Map<String, dynamic> tmp = jsonDecode(userAccountData);
+
+        account = tmp['account_owner'][0];
+        print("Retour du solde du client");
+        setState(() {
+          mysolde = account['amount'].toString();
+        });
+      } else {
+        print("La requete e échouée");
+        setState(() {
+          mysolde = account['status_account'].toString();
+        });
+      }
+    } catch (e) {
+      print(e.toString());
+      setState(() {
+        mysolde = account['status_account'].toString();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    accountRequest(widget.data['user_id']);
+
+    print("Le solde définitif : $mysolde");
+
     List<Widget> screens = [
-      Home(data: widget.data),
-      const Transaction(),
-      const SendMoney(),
-      ReceiveMoney(
-        userContact: widget.data!['contact'],
-      ),
+      Home(data: widget.data, solde: mysolde),
+      Transaction(solde: mysolde),
+      SendMoney(
+          solde: mysolde,
+          data: widget.data,
+          ),
+      ReceiveMoney(receiveCode: widget.data['receive_code'], solde: mysolde)
     ];
+
     List<String> titles = [
-      widget.data!['contact'],
+      widget.data['contact'],
       "Transactions",
       "Envoyer",
       "Recevoir"

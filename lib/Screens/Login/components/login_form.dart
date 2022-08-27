@@ -3,6 +3,7 @@
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+
 //import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -28,7 +29,7 @@ class LoginForm extends StatelessWidget {
     try {
       print("Tentative d'une connexion");
       Response response = await post(
-          Uri.parse('http://devinstapay.pythonanywhere.com/api/v1/login/'),
+          Uri.parse('http://164.92.134.116/api/v1/login/'),
           body: jsonEncode(
               <String, String>{"contact": contact, "password": password}),
           headers: <String, String>{"Content-Type": "application/json"});
@@ -132,9 +133,9 @@ class LoginForm extends StatelessWidget {
                     if (value == "fail") {
                       print("Connexion echouée");
                     } else {
-                      String userData =
-                          '{"first_name":"firstname" , "last_name":"lastname","contact":"001122334455","password":"passwordHashed"}';
-                      Map<String, dynamic> jsonUserData = jsonDecode(userData);
+                      /*String userData =
+                          '{"first_name":"firstname" , "last_name":"lastname","contact":"001122334455","password":"passwordHashed"}';*/
+                      Map<String, dynamic> jsonUserData = jsonDecode(value);
 
                       Navigator.push(
                         context,

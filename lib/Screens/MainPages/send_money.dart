@@ -1,11 +1,17 @@
 // ignore_for_file: avoid_print, prefer_const_constructors
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:http/http.dart';
 import '../../components/constants.dart';
 
 class SendMoney extends StatefulWidget {
-  const SendMoney({Key? key}) : super(key: key);
+  final String solde;
+  final Map<String, dynamic> data;
+  const SendMoney({Key? key, required this.solde, required this.data})
+      : super(key: key);
 
   @override
   State<SendMoney> createState() => _SendMoneyState();
@@ -64,9 +70,9 @@ class _SendMoneyState extends State<SendMoney> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const <Widget>[
+            children: <Widget>[
               Text(
-                '1,600,000',
+                widget.solde,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 25,
@@ -126,7 +132,6 @@ class _SendMoneyState extends State<SendMoney> {
                   TextFormField(
                     controller: amountToSendController,
                     textInputAction: TextInputAction.done,
-                    obscureText: true,
                     cursorColor: kPrimaryColor,
                     decoration: InputDecoration(
                       hintText: "Montant à transferer",
@@ -140,20 +145,22 @@ class _SendMoneyState extends State<SendMoney> {
                           borderSide: BorderSide(color: kSecondaryColor)),
                     ),
                   ),
-                  const SizedBox(height: defaultPadding * 2),
+                  SizedBox(height: defaultPadding * 2),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       Text("Montant restant"),
-                      Text("1599"),
+                      Text(
+                          "${double.parse(widget.solde) - double.parse((amountToSendController.text.isNotEmpty) ? amountToSendController.text : "0.0")}"),
                     ],
                   ),
                   const SizedBox(height: defaultPadding * 2),
                   FloatingActionButton(
                     backgroundColor: kPrimaryColor,
                     onPressed: () async {
-                    String response = await FlutterBarcodeScanner.scanBarcode('#ffffff', 'retour', true, ScanMode.QR);
-                    print(response);
+                      String response = await FlutterBarcodeScanner.scanBarcode(
+                          '#ffffff', 'retour', true, ScanMode.QR);
+                      print(response);
                     },
                     child: const Icon(
                       Icons.qr_code_scanner_outlined,
@@ -166,7 +173,36 @@ class _SendMoneyState extends State<SendMoney> {
                         vertical: defaultPadding,
                         horizontal: defaultPadding * 3),
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        try {
+                          print("Tentative d'envoie d'argent");
+                          Response response = await post(
+                              Uri.parse(
+                                  'http://164.92.134.116/api/v1/transactions/'),
+                              body: jsonEncode(<String, String>{
+                                "user_id": widget.data['user_id'],
+                                "send_code": widget.data['send_code'],
+                                "receive_code":
+                                    destinationAddressController.text,
+                                "amount": amountToSendController.text
+                              }),
+                              headers: <String, String>{
+                                "Content-Type": "application/json"
+                              });
+
+                          print(
+                              "Code de la reponse : [${response.statusCode}]");
+                          print("Contenue de la reponse : ${response.body}");
+
+                          if (response.statusCode == 200) {
+                            print("Transaction reussie");
+                          } else {
+                            print("Transaction échouée");
+                          }
+                        } catch (e) {
+                          print(e.toString());
+                        }
+                      },
                       child: Text(
                         "Envoyer",
                       ),

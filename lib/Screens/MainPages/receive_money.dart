@@ -10,8 +10,10 @@ import '../../components/constants.dart';
 import '../Home/component/qrcode_container.dart';
 
 class ReceiveMoney extends StatefulWidget {
-  final String userContact;
-  const ReceiveMoney({Key? key, required this.userContact}) : super(key: key);
+  final String receiveCode;
+  final String solde;
+  const ReceiveMoney({Key? key, required this.receiveCode, required this.solde})
+      : super(key: key);
 
   @override
   State<ReceiveMoney> createState() => _ReceiveMoneyState();
@@ -26,10 +28,10 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
     return hash.toString();
   }
 
-  String generateNewAddress(String userContact) {
+  String generateNewAddress(String receiveCode) {
     double random = Random().nextDouble() * 999999.9;
     String address = hashSomeThing(random).substring(0, 10);
-    address = "$userContact@$address";
+    address = "$receiveCode@$address";
     String addressHashed = "addr${hashSomeThing(address)}";
     return addressHashed;
   }
@@ -44,7 +46,7 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
           const SizedBox(
             height: 50,
           ),
-          mainBody(widget.userContact),
+          mainBody(widget.receiveCode),
         ],
       ),
     );
@@ -123,17 +125,17 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const <Widget>[
+            children: <Widget>[
               Text(
-                '1,600,000',
-                style: TextStyle(
+                widget.solde,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 25,
                   fontWeight: FontWeight.w600,
                   height: 0.9,
                 ),
               ),
-              Text(
+              const Text(
                 ' Fcfa',
                 style: TextStyle(
                   color: Colors.white,
@@ -158,9 +160,10 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
     );
   }
 
-  Expanded mainBody(String userContact) {
+  Expanded mainBody(String receiveCode) {
     Size size = MediaQuery.of(context).size;
-    String transactionAddress = generateNewAddress(userContact);
+    String userReceiveCode = receiveCode;
+    //generateNewAddress(receiveCode);
 
     return Expanded(
       child: Column(
@@ -183,7 +186,7 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
                         vertical: defaultPadding,
                         horizontal: defaultPadding * 2),
                     child: QrcodeContainer(
-                      data: transactionAddress,
+                      data: userReceiveCode,
                     ),
                   ),
                 ),
@@ -204,9 +207,9 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
                       Flexible(
                         fit: FlexFit.loose,
                         child: Padding(
-                          padding: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(8),
                           child: Text(
-                            transactionAddress,
+                            userReceiveCode,
                             overflow: TextOverflow.fade,
                             maxLines: 1,
                             softWrap: false,
@@ -217,16 +220,16 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
                   ),
                 ),
                 const SizedBox(
-                  height: defaultPadding,
+                  height: defaultPadding * 2,
                 ),
-                const SizedBox(height: defaultPadding),
+                /*
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       vertical: defaultPadding, horizontal: defaultPadding * 3),
                   child: ElevatedButton(
                     onPressed: () {
                       setState(() {
-                        generateNewAddress(userContact);
+                        generateNewAddress(receiveCode);
                       });
                     },
                     child: const Text(
@@ -234,6 +237,7 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
                     ),
                   ),
                 ),
+                */
                 const SizedBox(height: defaultPadding),
               ],
             ),

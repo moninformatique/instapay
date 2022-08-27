@@ -10,12 +10,12 @@ class UserProfil extends StatelessWidget {
   const UserProfil({Key? key, required this.data}) : super(key: key);
 
   void changePassword(String userId, oldPassword, newPassword) async {
+    print("$userId / $oldPassword / $newPassword");
     try {
       print("Tentative de changement de mot de passe");
 
       Response response = await post(
-          Uri.parse(
-              'http://devinstapay.pythonanywhere.com/api/v1/change_password/'),
+          Uri.parse('http://164.92.134.116/api/v1/change_password/'),
           body: jsonEncode(<String, String>{
             "user_id": userId,
             "old_password": oldPassword,
@@ -187,7 +187,7 @@ class UserProfil extends StatelessWidget {
               ],
             ),
           ),
-          Divider(),
+          const Divider(),
           const SizedBox(
             height: 50,
           ),
