@@ -1,5 +1,5 @@
 // ignore_for_file: must_be_immutable, avoid_print
-// 164.92.134.116 : serveur api instapay
+// 164.92.134.116 : serveur de l'API instapay
 import 'package:flutter/material.dart';
 import './Screens/Home/home_screen.dart';
 import './Screens/Welcome/welcome_screen.dart';
