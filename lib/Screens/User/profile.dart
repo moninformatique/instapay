@@ -10,9 +10,9 @@ class UserProfil extends StatelessWidget {
   const UserProfil({Key? key, required this.data}) : super(key: key);
 
   void changePassword(String userId, oldPassword, newPassword) async {
-    print("$userId / $oldPassword / $newPassword");
+    debugPrint("$userId / $oldPassword / $newPassword");
     try {
-      print("Tentative de changement de mot de passe");
+      debugPrint("Tentative de changement de mot de passe");
 
       Response response = await post(
           Uri.parse('http://164.92.134.116/api/v1/change_password/'),
@@ -23,18 +23,18 @@ class UserProfil extends StatelessWidget {
           }),
           headers: <String, String>{"Content-Type": "application/json"});
 
-      print("Code de la reponse : [${response.statusCode}]");
-      print("Contenue de la reponse : ${response.body}");
+      debugPrint("Code de la reponse : [${response.statusCode}]");
+      debugPrint("Contenue de la reponse : ${response.body}");
       //String content = response.body.toString();
       //file.writeAsStringSync(content);
 
       if (response.statusCode == 200) {
-        print("Le changement du mot de passe a été éffectué");
+        debugPrint("Le changement du mot de passe a été éffectué");
       } else {
-        print("le changement de mot de passe a échoué");
+        debugPrint("le changement de mot de passe a échoué");
       }
     } catch (e) {
-      print(e.toString());
+      debugPrint(e.toString());
     }
   }
 
@@ -66,7 +66,7 @@ class UserProfil extends StatelessWidget {
               ),
             ],
           ),
-          Divider(),
+          const Divider(),
           const SizedBox(
             height: 10,
           ),
@@ -248,7 +248,7 @@ class UserProfil extends StatelessWidget {
                 vertical: defaultPadding, horizontal: defaultPadding * 3),
             child: ElevatedButton(
               onPressed: () {
-                print("Hashage du mot de passe");
+                debugPrint("Hashage du mot de passe");
                 var encodeOldPassword = utf8.encode(oldPasswordController.text);
                 var encodeNewPassword = utf8.encode(newPasswordController.text);
 
@@ -256,9 +256,9 @@ class UserProfil extends StatelessWidget {
                     sha256.convert(encodeOldPassword).toString();
                 String hashNewPassword =
                     sha256.convert(encodeNewPassword).toString();
-                print("user ID : ${data!["user_id"]} ");
-                print("Old : $hashOldPassword");
-                print("new : $hashNewPassword");
+                debugPrint("user ID : ${data!["user_id"]} ");
+                debugPrint("Old : $hashOldPassword");
+                debugPrint("new : $hashNewPassword");
                 changePassword(
                     data!["user_id"], hashOldPassword, hashNewPassword);
               },
