@@ -30,42 +30,38 @@ dependencies:
   flutter:
     sdk: flutter
 
-  #image_picker: ^0.6.3+4
-  image_cropper: ^1.2.1
-  hash: ^1.0.1
-  
-
-  #sqlite: ^1.3.0
-  path_provider: ^1.6.5
-  
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.5
-  flutter_svg: ^1.1.0
+  cupertino_icons: ^1.0.2
   http: ^0.13.5
-  modal_progress_hud_nsn: ^0.1.0-nullsafety-1
-
-  build_runner: ^2.2.0
-  
-  flutter_barcode_scanner: ^2.0.0
-  barcode_widget: ^2.0.2
-  
-  json_annotation: ^4.6.0
-  json_serializable: ^6.3.1
   crypto: ^3.0.2
+  flutter_svg: ^1.1.4
+  passcode_screen: ^2.0.1
+  barcode_widget: ^2.0.3
+  flutter_barcode_scanner: ^2.0.0
+  email_validator: ^2.1.17
+  google_fonts: ^3.0.1
+  shared_preferences: ^2.0.15
+  
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.1
+  flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.10.0
+
+
+flutter_icons:
+  android: true
+  #ios: true
+  image_path: "assets/icons/logo.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -1,18 +1,16 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
+
 import '../../components/constants.dart';
 import 'component/model.dart';
 
-class Transaction extends StatefulWidget {
-  final String solde;
-  const Transaction({Key? key, required this.solde}) : super(key: key);
+class Transactions extends StatefulWidget {
+  const Transactions({Key? key}) : super(key: key);
 
   @override
-  State<Transaction> createState() => _TransactionState();
+  State<Transactions> createState() => _TransactionsState();
 }
 
-class _TransactionState extends State<Transaction> {
+class _TransactionsState extends State<Transactions> {
   List<TransactionModel> transactionList = [
     const TransactionModel(
       icon: Icons.call_received,
@@ -109,14 +107,15 @@ class _TransactionState extends State<Transaction> {
         Padding(
           padding: const EdgeInsets.only(right: 0),
           child: IconButton(
-            onPressed: () => print('Chargement de la page des notifications'),
+            onPressed: () =>
+                debugPrint('Chargement de la page des notifications'),
             icon: const Icon(Icons.notifications),
           ),
         ),
         Padding(
           padding: const EdgeInsets.only(right: 10),
           child: IconButton(
-            onPressed: () => print('Chargement du menu'),
+            onPressed: () => debugPrint('Chargement du menu'),
             icon: Image.asset(
               'assets/images/menu.png',
               fit: BoxFit.fitWidth,
@@ -128,6 +127,7 @@ class _TransactionState extends State<Transaction> {
   }
 
   Container appBarBottomSection() {
+    String solde = "100.000";
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 50),
       width: MediaQuery.of(context).size.width,
@@ -163,7 +163,7 @@ class _TransactionState extends State<Transaction> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                widget.solde,
+                solde,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 25,

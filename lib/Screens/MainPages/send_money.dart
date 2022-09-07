@@ -1,16 +1,21 @@
-// ignore_for_file: avoid_print, prefer_const_constructors
-
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:http/http.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import '../../components/constants.dart';
 
 class SendMoney extends StatefulWidget {
+  final String userID;
   final String solde;
-  final Map<String, dynamic> data;
-  const SendMoney({Key? key, required this.solde, required this.data})
+  final String sendCode;
+  final String receiveCode;
+  const SendMoney(
+      {Key? key,
+      required this.userID,
+      required this.solde,
+      required this.sendCode,
+      required this.receiveCode})
       : super(key: key);
 
   @override
@@ -20,15 +25,45 @@ class SendMoney extends StatefulWidget {
 class _SendMoneyState extends State<SendMoney> {
   TextEditingController destinationAddressController = TextEditingController();
   TextEditingController amountToSendController = TextEditingController();
+  String mysolde = "0";
+
+  void accountRequest(String userID) async {
+    Map<String, dynamic> account = jsonDecode("{}");
+
+    debugPrint("Tentative de recupération des infos solde");
+    Response response = await get(Uri.parse('${api}users/$userID/accounts/'));
+
+    debugPrint("Code de la reponse : [${response.statusCode}]");
+    debugPrint("Contenue de la reponse : ${response.body}");
+
+    if (response.statusCode == 200) {
+      String userAccountData = response.body.toString();
+      Map<String, dynamic> tmp = jsonDecode(userAccountData);
+
+      account = tmp['account_owner'][0];
+      debugPrint("Retour du solde du client");
+      mysolde = account['amount'].toString();
+    } else {
+      debugPrint("La requete e échouée");
+      mysolde = "0";
+    }
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    //accountRequest(widget.userID);
     return Scaffold(
       body: Column(
         children: <Widget>[
           appBarBottomSection(),
           const SizedBox(
-            height: 100,
+            height: 20,
           ),
           mainBody(),
         ],
@@ -38,10 +73,10 @@ class _SendMoneyState extends State<SendMoney> {
 
   Container appBarBottomSection() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 50),
+      padding: const EdgeInsets.symmetric(horizontal: 30),
       width: MediaQuery.of(context).size.width,
       decoration: const BoxDecoration(
-        color: kPrimaryColor,
+        color: kBackgroundColor,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(50),
           bottomRight: Radius.circular(50),
@@ -50,46 +85,64 @@ class _SendMoneyState extends State<SendMoney> {
       child: Column(
         children: <Widget>[
           const SizedBox(
-            height: 50,
+            height: 10,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Text("Fonds total",
+          Container(
+            height: 150,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              color: kWeightBoldColor,
+              borderRadius: BorderRadius.circular(30),
+              border:
+                  Border.all(color: kPrimaryColor.withOpacity(0.1), width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: kSimpleTextColor.withOpacity(0.4),
+                  offset: const Offset(0, 8),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Vous disposez de',
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    height: 0.9,
-                  )),
-            ],
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                widget.solde,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w600,
-                  height: 0.9,
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    height: 1,
+                  ),
                 ),
-              ),
-              Text(
-                ' Fcfa',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w500,
-                  height: 1,
+                const SizedBox(
+                  height: 20,
                 ),
-              ),
-            ],
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      widget.solde,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600,
+                        height: 0.9,
+                      ),
+                    ),
+                    const Text(
+                      ' Fcfa',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w500,
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           const SizedBox(
             height: 50,
@@ -105,8 +158,8 @@ class _SendMoneyState extends State<SendMoney> {
         children: [
           Form(
             child: Padding(
-              padding: EdgeInsets.symmetric(
-                  vertical: defaultPadding, horizontal: defaultPadding * 2),
+              padding: const EdgeInsets.symmetric(
+                  vertical: defaultPadding, horizontal: defaultPadding),
               child: Column(
                 children: [
                   TextFormField(
@@ -119,14 +172,14 @@ class _SendMoneyState extends State<SendMoney> {
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(color: kSecondaryColor)),
-                      prefixIcon: Padding(
+                          borderSide: const BorderSide(color: kPrimaryColor)),
+                      prefixIcon: const Padding(
                         padding: EdgeInsets.all(defaultPadding),
                         child: Icon(Icons.qr_code),
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: defaultPadding,
                   ),
                   TextFormField(
@@ -135,32 +188,35 @@ class _SendMoneyState extends State<SendMoney> {
                     cursorColor: kPrimaryColor,
                     decoration: InputDecoration(
                       hintText: "Montant à transferer",
-                      prefixIcon: Padding(
+                      prefixIcon: const Padding(
                         padding: EdgeInsets.all(defaultPadding),
                         child: Icon(Icons.currency_franc),
                       ),
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(color: kSecondaryColor)),
+                          borderSide: const BorderSide(color: kPrimaryColor)),
                     ),
                   ),
-                  SizedBox(height: defaultPadding * 2),
+                  const SizedBox(height: defaultPadding),
+                  /*
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Montant restant"),
+                      const Text("Montant restant"),
                       Text(
                           "${double.parse(widget.solde) - double.parse((amountToSendController.text.isNotEmpty) ? amountToSendController.text : "0.0")}"),
                     ],
-                  ),
+                  ),*/
                   const SizedBox(height: defaultPadding * 2),
                   FloatingActionButton(
                     backgroundColor: kPrimaryColor,
                     onPressed: () async {
                       String response = await FlutterBarcodeScanner.scanBarcode(
                           '#ffffff', 'retour', true, ScanMode.QR);
-                      print(response);
+                      debugPrint(
+                          "==========================================================================================");
+                      debugPrint(response);
                     },
                     child: const Icon(
                       Icons.qr_code_scanner_outlined,
@@ -174,36 +230,58 @@ class _SendMoneyState extends State<SendMoney> {
                         horizontal: defaultPadding * 3),
                     child: ElevatedButton(
                       onPressed: () async {
-                        try {
-                          print("Tentative d'envoie d'argent");
-                          Response response = await post(
-                              Uri.parse(
-                                  'http://164.92.134.116/api/v1/transactions/'),
-                              body: jsonEncode(<String, String>{
-                                "user_id": widget.data['user_id'],
-                                "send_code": widget.data['send_code'],
-                                "receive_code":
-                                    destinationAddressController.text,
-                                "amount": amountToSendController.text
-                              }),
-                              headers: <String, String>{
-                                "Content-Type": "application/json"
-                              });
+                        if (int.parse(widget.solde) >
+                            int.parse((amountToSendController.text.isNotEmpty)
+                                ? amountToSendController.text
+                                : "0")) {
+                          if (widget.receiveCode !=
+                              destinationAddressController.text) {
+                            try {
+                              debugPrint("Tentative d'envoie d'argent");
+                              Response response = await post(
+                                  Uri.parse('${api}transactions/'),
+                                  body: jsonEncode(<String, String>{
+                                    "user_id": widget.userID,
+                                    "send_code": widget.sendCode,
+                                    "receive_code":
+                                        destinationAddressController.text,
+                                    "amount": amountToSendController.text
+                                  }),
+                                  headers: <String, String>{
+                                    "Content-Type": "application/json"
+                                  });
 
-                          print(
-                              "Code de la reponse : [${response.statusCode}]");
-                          print("Contenue de la reponse : ${response.body}");
+                              debugPrint(
+                                  "Code de la reponse : [${response.statusCode}]");
+                              debugPrint(
+                                  "Contenue de la reponse : ${response.body}");
 
-                          if (response.statusCode == 200) {
-                            print("Transaction reussie");
+                              if (response.statusCode == 200) {
+                                debugPrint("Transaction reussie");
+                              } else {
+                                debugPrint("Transaction échouée");
+                              }
+                            } catch (e) {
+                              debugPrint(e.toString());
+                            }
                           } else {
-                            print("Transaction échouée");
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [Text("Transaction inutile")],
+                            )));
                           }
-                        } catch (e) {
-                          print(e.toString());
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Text("Votre solde est insuffisant")
+                            ],
+                          )));
                         }
                       },
-                      child: Text(
+                      child: const Text(
                         "Envoyer",
                       ),
                     ),

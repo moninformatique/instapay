@@ -194,7 +194,7 @@ class UserProfil extends StatelessWidget {
           const Text(
             "Changer de mot de passe",
             style: TextStyle(
-              color: kSecondaryColor,
+              color: kPrimaryColor,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -214,7 +214,7 @@ class UserProfil extends StatelessWidget {
                 hintText: "Saisisez le mode passe actuel",
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
-                    borderSide: const BorderSide(color: kSecondaryColor)),
+                    borderSide: const BorderSide(color: kPrimaryColor)),
                 prefixIcon: const Padding(
                   padding: EdgeInsets.all(defaultPadding),
                   child: Icon(Icons.lock),
@@ -235,7 +235,7 @@ class UserProfil extends StatelessWidget {
                 hintText: "Saisisez le nouveau mot de passe",
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
-                    borderSide: const BorderSide(color: kSecondaryColor)),
+                    borderSide: const BorderSide(color: kPrimaryColor)),
                 prefixIcon: const Padding(
                   padding: EdgeInsets.all(defaultPadding),
                   child: Icon(Icons.lock),

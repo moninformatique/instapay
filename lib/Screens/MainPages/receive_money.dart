@@ -1,18 +1,20 @@
-// ignore_for_file: avoid_print
-
 import 'dart:convert';
-import 'dart:math';
 
-import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
-import '../../components/constants.dart';
+import 'package:http/http.dart';
 
-import '../Home/component/qrcode_container.dart';
+import '../../components/constants.dart';
+import 'component/qrcode_container.dart';
 
 class ReceiveMoney extends StatefulWidget {
-  final String receiveCode;
+  final String userID;
   final String solde;
-  const ReceiveMoney({Key? key, required this.receiveCode, required this.solde})
+  final String receiveCode;
+  const ReceiveMoney(
+      {Key? key,
+      required this.userID,
+      required this.solde,
+      required this.receiveCode})
       : super(key: key);
 
   @override
@@ -20,83 +22,59 @@ class ReceiveMoney extends StatefulWidget {
 }
 
 class _ReceiveMoneyState extends State<ReceiveMoney> {
-  TextEditingController myTransactionaddress = TextEditingController();
+  String mysolde = "0";
 
-  String hashSomeThing(var data) {
-    var dataEncoded = utf8.encode(data.toString());
-    Digest hash = sha256.convert(dataEncoded);
-    return hash.toString();
+  void accountRequest(String userID) async {
+    Map<String, dynamic> account = jsonDecode("{}");
+
+    debugPrint("Tentative de recupération des infos solde");
+    Response response = await get(Uri.parse('${api}users/$userID/accounts/'));
+
+    debugPrint("Code de la reponse : [${response.statusCode}]");
+    debugPrint("Contenue de la reponse : ${response.body}");
+
+    if (response.statusCode == 200) {
+      String userAccountData = response.body.toString();
+      Map<String, dynamic> tmp = jsonDecode(userAccountData);
+
+      account = tmp['account_owner'][0];
+      debugPrint("Retour du solde du client");
+      mysolde = account['amount'].toString();
+    } else {
+      debugPrint("La requete e échouée");
+      mysolde = "0";
+    }
+    setState(() {});
   }
 
-  String generateNewAddress(String receiveCode) {
-    double random = Random().nextDouble() * 999999.9;
-    String address = hashSomeThing(random).substring(0, 10);
-    address = "$receiveCode@$address";
-    String addressHashed = "addr${hashSomeThing(address)}";
-    return addressHashed;
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    //accountRequest(widget.userID);
     return Scaffold(
-      //appBar: buildAppBar(),
       body: Column(
         children: <Widget>[
           appBarBottomSection(),
           const SizedBox(
-            height: 50,
+            height: 20,
           ),
-          mainBody(widget.receiveCode),
+          mainBody(),
         ],
       ),
     );
   }
 
-  AppBar buildAppBar() {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: kPrimaryColor,
-      leading: const Padding(
-        padding: EdgeInsets.only(left: 20, top: 15),
-        child: Text(
-          "Recevoir",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 17,
-            fontWeight: FontWeight.w500,
-            height: 1,
-          ),
-        ),
-      ),
-      leadingWidth: 500,
-      actions: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(right: 0),
-          child: IconButton(
-            onPressed: () => print('Chargement de la page des notifications'),
-            icon: const Icon(Icons.notifications),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 10),
-          child: IconButton(
-            onPressed: () => print('Chargement du menu'),
-            icon: Image.asset(
-              'assets/images/menu.png',
-              fit: BoxFit.fitWidth,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Container appBarBottomSection() {
+    
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 50),
+      padding: const EdgeInsets.symmetric(horizontal: 30),
       width: MediaQuery.of(context).size.width,
       decoration: const BoxDecoration(
-        color: kPrimaryColor,
+        color: kBackgroundColor,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(50),
           bottomRight: Radius.circular(50),
@@ -105,64 +83,75 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
       child: Column(
         children: <Widget>[
           const SizedBox(
-            height: 50,
+            height: 10,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Text("Fonds total",
+          Container(
+            height: 150,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              color: kWeightBoldColor,
+              borderRadius: BorderRadius.circular(30),
+              border:
+                  Border.all(color: kPrimaryColor.withOpacity(0.1), width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: kSimpleTextColor.withOpacity(0.4),
+                  offset: const Offset(0, 8),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Vous disposez de',
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    height: 0.9,
-                  )),
-            ],
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                widget.solde,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w600,
-                  height: 0.9,
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    height: 1,
+                  ),
                 ),
-              ),
-              const Text(
-                ' Fcfa',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w500,
-                  height: 1,
+                const SizedBox(
+                  height: 20,
                 ),
-              ),
-            ],
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      widget.solde,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600,
+                        height: 0.9,
+                      ),
+                    ),
+                    const Text(
+                      ' Fcfa',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w500,
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           const SizedBox(
-            height: 8,
-          ),
-          const SizedBox(
-            height: 32,
-          ),
-          const SizedBox(
-            height: 20,
+            height: 50,
           ),
         ],
       ),
     );
   }
 
-  Expanded mainBody(String receiveCode) {
+  Expanded mainBody() {
     Size size = MediaQuery.of(context).size;
-    String userReceiveCode = receiveCode;
     //generateNewAddress(receiveCode);
 
     return Expanded(
@@ -170,31 +159,26 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(
-                vertical: defaultPadding, horizontal: defaultPadding * 2),
+                vertical: defaultPadding, horizontal: defaultPadding),
             child: Column(
               children: [
                 Container(
-                  height: 200,
-                  width: 200,
+                  height: 150,
+                  width: 150,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(29),
                     color: Colors.transparent,
                     border: Border.all(color: kPrimaryColor, width: 1.0),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: defaultPadding,
-                        horizontal: defaultPadding * 2),
-                    child: QrcodeContainer(
-                      data: userReceiveCode,
-                    ),
+                  child: QrcodeContainer(
+                    data: widget.receiveCode,
                   ),
                 ),
                 const SizedBox(
                   height: 20,
                 ),
                 Container(
-                  height: 40,
+                  height: 45,
                   width: size.width,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
@@ -209,7 +193,7 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
                         child: Padding(
                           padding: const EdgeInsets.all(8),
                           child: Text(
-                            userReceiveCode,
+                            widget.receiveCode,
                             overflow: TextOverflow.fade,
                             maxLines: 1,
                             softWrap: false,
@@ -218,9 +202,6 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(
-                  height: defaultPadding * 2,
                 ),
                 /*
                 Padding(
@@ -241,9 +222,6 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
                 const SizedBox(height: defaultPadding),
               ],
             ),
-          ),
-          const SizedBox(
-            height: 80,
           ),
           const Text(
             "Se recharger à partir de :",

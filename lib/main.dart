@@ -1,13 +1,20 @@
-// ignore_for_file: must_be_immutable, avoid_print
-// 164.92.134.116 : serveur de l'API instapay
-import 'package:flutter/material.dart';
-import './Screens/Home/home_screen.dart';
-import './Screens/Welcome/welcome_screen.dart';
-import 'components/constants.dart';
-import 'dart:io';
+// ignore_for_file: use_build_context_synchronously
+
+//------------------- Import des packages -----------------------//
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'components/constants.dart';
+import 'Screens/Login/login.dart';
+import 'Screens/PinCode/pin_code.dart';
 
 void main() => runApp(const MyApp());
+
+///     MyApp
+///     -----
+/// Widget racine de l'application
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -18,9 +25,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'instapay',
+      // Définition de style globale
       theme: ThemeData(
-          primaryColor: kPrimaryColor,
-          scaffoldBackgroundColor: Colors.white,
+          primaryColor: kSimpleTextColor,
+          scaffoldBackgroundColor: kBackgroundBodyColor,
+          textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
               elevation: 0,
@@ -36,75 +45,62 @@ class MyApp extends StatelessWidget {
             iconColor: kPrimaryColor,
             prefixIconColor: kPrimaryColor,
             contentPadding: EdgeInsets.symmetric(
-                horizontal: defaultPadding, vertical: defaultPadding),
+                horizontal: defaultPadding / 2, vertical: defaultPadding / 2),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(30)),
-              borderSide: BorderSide.none,
-            ),
+                borderRadius: BorderRadius.all(Radius.circular(50)),
+                borderSide: BorderSide.none),
           )),
-      home: NextPage(),
+      home: const LoadPage(),
     );
   }
 }
 
-class NextPage extends StatelessWidget {
-  NextPage({Key? key}) : super(key: key);
+///     LoadPage
+///     --------
+///   Ce Widget a pour rôle de déterminer la page qui doit être charger deh le démarrage de l'application
+///   entre la page de connexion (LoginScreen) s'il n'existe aucun utilisateur connecté et
+///   la page d'authentification par code PIN (PinCodeAuth) s'il y a déjà un utilisateur connecté.///
 
-  Map<String, dynamic> jsonUserData = jsonDecode("{}");
+class LoadPage extends StatefulWidget {
+  const LoadPage({Key? key}) : super(key: key);
 
-  bool checkIfUserIsLogged() {
-    final usersDirectory = Directory("./users");
-    final sessionsDirectory = Directory("./sessions");
+  @override
+  State<LoadPage> createState() => _LoadPageState();
+}
 
-    if (!usersDirectory.existsSync()) {
-      usersDirectory.createSync(recursive: true);
-    }
-    if (!sessionsDirectory.existsSync()) {
-      sessionsDirectory.createSync(recursive: true);
-    }
+class _LoadPageState extends State<LoadPage> {
+  @override
+  void initState() {
+    super.initState();
+    checkSession();
+  }
 
-    File file = File('./sessions/.islogged');
-    // Tester si le fichier temoin d'une connexion existe
-    print(
-        "Teste de l'existence  du fichier temoin d'une connexion à l'application ");
-    bool value = file.existsSync();
+  // Fonction de verificatio de session existante
+  void checkSession() async {
+    // Ici nous alons obtenir les informations de l'utlisateur sauvegardées lors de l'inscription
+    // Il sont enregistré en chaine de caractère == les convertir en format json pour utiliser les données.
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String? userDataSaved = pref.getString("user");
 
-    if (value) {
-      print("Le fichier temoin d'une connexion existe belle et bien");
-      // si oui, lire le contenu du fichier qui est son contact
+    if (userDataSaved != null) {
+      // Il existe de données utilisateur == un utilisateur s'est déjà connecté
 
-      print("Extration du fichier temoin le contact de l'utilisateur connecté");
-      File loginfile = File('./sessions/.islogged');
-      String valueLoginfile = loginfile.readAsStringSync();
-      print("Le contact de l'utilisateur connecté est : $valueLoginfile");
-
-      //se servir de son contact pour acceder aus données de l'utilisateur
-      File userdatafile = File('./users/$valueLoginfile.json');
-      print("Chargement des données de l'utilisateur à partir de son contact");
-      String valueUserdata = userdatafile.readAsStringSync();
-      print("Les données de l'utilisateur connecté : $valueUserdata");
-
-      jsonUserData = jsonDecode(valueUserdata);
-      jsonUserData = jsonUserData["data"][0];
-      print("Check if user is logged is TRUE");
-      return true;
+      var userData = jsonDecode(userDataSaved);
+      debugPrint("Utilisateur connecté [${userData['contact']}] ");
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  PinCodeAuth(userContact: userData['contact'].toString())));
     } else {
-      print("Check if user is logged is FALSE");
-      return false;
+      debugPrint("[Aucun utilisateur connecté] ");
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    //bool varTest = false;
-    if (checkIfUserIsLogged()) {
-      print("*************TRUE***************");
-      print(jsonUserData);
-      print(jsonUserData["first_name"]);
-      return MyHomePage(data: jsonUserData);
-    } else {
-      print("****************FALSE***********");
-      return const WelcomeScreen();
-    }
+    return const Scaffold();
   }
 }
