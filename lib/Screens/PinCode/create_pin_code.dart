@@ -3,7 +3,7 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
-import 'package:instapay_master/Screens/Login/login.dart';
+import '../Login/login.dart';
 import 'components/numeric_pad.dart';
 import 'components/top_pincode_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,7 +27,7 @@ class CreatePinCode extends StatefulWidget {
 }
 
 class _CreatePinCodeState extends State<CreatePinCode> {
-  String userImage = "assets/images/profile.png";
+  String userImage = "assets/logos/5-rb.png";
   String userMessage = "Enregistrez votre code PIN";
 
   bool codepinDisMatch = false;
@@ -120,7 +120,7 @@ class SavePinCode extends StatefulWidget {
 }
 
 class _SavePinCodeState extends State<SavePinCode> {
-  String userImage = "assets/images/profile.png";
+  String userImage = "assets/logos/5-rb.png";
   String userMessage = "Confirmez votre code PIN";
 
   bool codepinDisMatch = false;
@@ -137,29 +137,14 @@ class _SavePinCodeState extends State<SavePinCode> {
 
     // Stocker dans la memoire de l'appareil
     await pref.setString("pin", pingHash);
+    await pref.setString("user", widget.userEmail);
     debugPrint("Code Pin : $code / $pingHash");
 
-    // Obtention des données de l'utilisateur enregistrées lors de la connexion ou l'inscription
-    String? userDataSaved = pref.getString("user");
-
-    if (userDataSaved != null) {
-      var userData = jsonDecode(userDataSaved);
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreen(userData: userData),
-          ));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [Text("Aucune données, veuillez vous reconnecter")],
-      )));
-      dataNotFound = true;
-      codepinDisMatch = false;
-      await pref.clear();
-    }
-    setState(() {});
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(userEmail: widget.userEmail),
+        ));
   }
 
   @override

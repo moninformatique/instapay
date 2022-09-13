@@ -46,14 +46,14 @@ class _PinCodeAuthState extends State<PinCodeAuth> {
       if (pinSaved == pinEntred) {
         // Le code PIN entré est correct
         debugPrint("Le code PIN est correcte");
-        String? savedData = pref.getString("user");
+        String? userEmail = pref.getString("user");
 
-        if (savedData != null) {
-          Map<String, dynamic> userData = jsonDecode(savedData);
+        if (userEmail != null) {
+          //Map<String, dynamic> userData = jsonDecode(savedData);
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => HomeScreen(userData: userData)));
+                  builder: (context) => HomeScreen(userEmail: userEmail)));
         }
       } else {
         // le code PIN entré est incorret
@@ -118,7 +118,7 @@ class _PinCodeAuthState extends State<PinCodeAuth> {
           // Partie supérieur de la page
           TopPincodeScreen(
             userEmail: widget.userContact,
-            userImage: "assets/images/profile.png",
+            userImage: "assets/logos/5-rb.png",
             userMessage: "Bon retour",
           ),
 

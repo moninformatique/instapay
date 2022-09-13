@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.17.5 <3.0.0"
+  sdk: ">=2.17.6 <3.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -34,15 +34,21 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  shared_preferences: ^2.0.15
   http: ^0.13.5
   crypto: ^3.0.2
   flutter_svg: ^1.1.4
   passcode_screen: ^2.0.1
   barcode_widget: ^2.0.3
   flutter_barcode_scanner: ^2.0.0
-  email_validator: ^2.1.17
   google_fonts: ^3.0.1
-  shared_preferences: ^2.0.15
+  email_validator: ^2.1.17
+  local_auth: ^2.1.2
+  internet_connection_checker: ^0.0.1+4
+  get: ^4.6.5
+  lottie: ^1.4.2
+  skeletons: ^0.0.3
+  cached_network_image: ^3.2.1
   
 
 dev_dependencies:
@@ -60,8 +66,10 @@ dev_dependencies:
 
 flutter_icons:
   android: true
-  #ios: true
-  image_path: "assets/icons/logo.png"
+  ios: true
+  image_path: "assets/logos/4-rb.png"
+  adaptative_icon_background: "#ffffff"
+  adaptative_icon_foreground: "assets/logos/4.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -78,6 +86,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/logos/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -101,6 +110,6 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
-  #
+  
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

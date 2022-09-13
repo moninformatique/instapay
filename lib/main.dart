@@ -80,18 +80,18 @@ class _LoadPageState extends State<LoadPage> {
     // Ici nous alons obtenir les informations de l'utlisateur sauvegardées lors de l'inscription
     // Il sont enregistré en chaine de caractère == les convertir en format json pour utiliser les données.
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String? userDataSaved = pref.getString("user");
+    String? userEmail = pref.getString("user");
+    String? userPinCode = pref.getString("pin");
 
-    if (userDataSaved != null) {
+    if (userEmail != null && userPinCode != null) {
       // Il existe de données utilisateur == un utilisateur s'est déjà connecté
 
-      var userData = jsonDecode(userDataSaved);
-      debugPrint("Utilisateur connecté [${userData['contact']}] ");
+      debugPrint("Utilisateur connecté [$userEmail] ");
       Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  PinCodeAuth(userContact: userData['contact'].toString())));
+                  PinCodeAuth(userContact: userEmail.toString())));
     } else {
       debugPrint("[Aucun utilisateur connecté] ");
       Navigator.push(context,

@@ -6,8 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../../Screens/PinCode/create_pin_code.dart';
+import '../login.dart';
 import '../../../components/constants.dart';
 
 class RegisterForm extends StatefulWidget {
@@ -58,9 +57,8 @@ class _RegisterFormState extends State<RegisterForm> {
           debugPrint("Tentative d'inscription");
           Response response = await post(Uri.parse('${api}signup/'),
               body: jsonEncode(<String, String>{
-                "first_name": fullNameController.text,
-                "last_name": fullNameController.text,
-                "contact": emailController.text,
+                "full_name": fullNameController.text,
+                "email": emailController.text,
                 "password": passwordHashed
               }),
               headers: <String, String>{"Content-Type": "application/json"});
@@ -68,17 +66,20 @@ class _RegisterFormState extends State<RegisterForm> {
           debugPrint("requete d'inscription envoyée");
           debugPrint("Code de la reponse : [${response.statusCode}]");
           debugPrint("Contenue de la reponse : ${response.body}");
+          var reponse = jsonDecode(response.body.toString());
 
-          if (response.statusCode == 200) {
+          if (response.statusCode == 200 || response.statusCode == 201) {
             debugPrint("L'inscription à été éffectué");
-            loadHomePage(response.body.toString());
+            openDialog(emailController.text);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                    "Inscription échouée [Code http : ${response.statusCode} ]")
+                  reponse["result"] ?? reponse["erreur"],
+                  style: const TextStyle(fontSize: 7),
+                )
               ],
             )));
           }
@@ -101,24 +102,22 @@ class _RegisterFormState extends State<RegisterForm> {
     }
   }
 
-  void loadHomePage(String jsonData) async {
-    debugPrint(" Chargement de la page d'accueil");
-
-    SharedPreferences pref = await SharedPreferences.getInstance();
-
-    Map<String, dynamic> jsonResponse = jsonDecode(jsonData);
-    Map<String, dynamic> userData = jsonResponse['data'][0];
-
-    String userDataToSave = jsonEncode(userData);
-    await pref.setString("user", userDataToSave);
-
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => CreatePinCode(
-                  userEmail: userData['contact'],
-                )));
-  }
+  Future openDialog(String email) => showDialog(
+      context: context,
+      builder: ((context) => AlertDialog(
+            content: Text(
+                "Un mail à été envoyé à l'addresse $email pour l'activation de votre compte. Activez votre compte avant de vous cnnecter"),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const LoginScreen()));
+                  },
+                  child: const Text("Bien compris"))
+            ],
+          )));
 
   @override
   Widget build(BuildContext context) {
@@ -137,15 +136,15 @@ class _RegisterFormState extends State<RegisterForm> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: defaultPadding),
+                  const SizedBox(height: mediumPadding),
 
                   // texte de bienvenue
                   const Text(
-                    'Inscrivez-vous',
+                    'Rejoingnez nous',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   const SizedBox(
-                    height: defaultPadding,
+                    height: bigMediumPadding,
                   ),
 
                   // Image d'inscription
@@ -162,7 +161,7 @@ class _RegisterFormState extends State<RegisterForm> {
                       const Spacer(),
                     ],
                   ),
-                  const SizedBox(height: bigMediumPadding),
+                  const SizedBox(height: bigMediumPadding * 2),
 
                   // formulaire d'inscription
                   Form(
@@ -178,7 +177,7 @@ class _RegisterFormState extends State<RegisterForm> {
                           child: TextFormField(
                             controller: fullNameController,
                             decoration: const InputDecoration(
-                              prefixIcon: Icon(Icons.person_outline),
+                              prefixIcon: Icon(Icons.person),
                               hintText: "Nom complet",
                             ),
                             validator: (fullname) {
@@ -199,7 +198,7 @@ class _RegisterFormState extends State<RegisterForm> {
                             obscureText: false,
                             keyboardType: TextInputType.emailAddress,
                             decoration: const InputDecoration(
-                              prefixIcon: Icon(Icons.mail_outline),
+                              prefixIcon: Icon(Icons.mail),
                               hintText: "Email",
                             ),
                             validator: (email) {
@@ -221,7 +220,7 @@ class _RegisterFormState extends State<RegisterForm> {
                             obscureText: obscuretext,
                             keyboardType: TextInputType.text,
                             decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.lock_outline),
+                              prefixIcon: const Icon(Icons.lock),
                               suffixIcon: GestureDetector(
                                 onTap: () {
                                   setState(() {
@@ -257,7 +256,7 @@ class _RegisterFormState extends State<RegisterForm> {
                             obscureText: obscuretext,
                             keyboardType: TextInputType.text,
                             decoration: const InputDecoration(
-                              prefixIcon: Icon(Icons.lock_outline),
+                              prefixIcon: Icon(Icons.lock),
                               hintText: "Confirmez mot de passe",
                             ),
                             validator: (value) {
@@ -288,7 +287,7 @@ class _RegisterFormState extends State<RegisterForm> {
                                       formKey.currentState!.validate();
                                   if (isValidForm) {
                                     debugPrint(
-                                        "Inscription de l'utilisateur : [${emailController.text} / ${passwordController.text}");
+                                        "Inscription de l'utilisateur : [${emailController.text} / ${passwordController.text}]");
                                     signUp();
                                   } else {
                                     ScaffoldMessenger.of(context)

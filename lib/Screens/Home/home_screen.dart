@@ -5,14 +5,18 @@ import 'package:http/http.dart';
 import '../Login/login.dart';
 import '../MainPages/receive_money.dart';
 import '../MainPages/send_money.dart';
-import '../../../components/constants.dart';
+import 'package:instapay_master/components/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../MainPages/home.dart';
 
 class HomeScreen extends StatefulWidget {
-  final Map<String, dynamic> userData;
-  const HomeScreen({Key? key, required this.userData}) : super(key: key);
+  //final Map<String, dynamic> userData;
+  // ignore: prefer_typing_uninitialized_variables
+  final userEmail;
+  const HomeScreen(
+      {Key? key, /*required this.userData, */ required this.userEmail})
+      : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -24,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String sendCode = "";
   String receiveCode = "";
 
+/*
   void accountRequest(String userID) async {
     Map<String, dynamic> account = jsonDecode("{}");
 
@@ -85,8 +90,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     super.dispose();
   }
-
+*/
   @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(child: Text("Welcome ${widget.userEmail}")),
+    );
+  }
+  /*
   Widget build(BuildContext context) {
     accountRequest(widget.userData['user_id']);
     userDataRequest(widget.userData['user_id']);
@@ -161,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
+*/
   ///
   ///
   ///

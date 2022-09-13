@@ -19,7 +19,7 @@ const double bigMediumPadding = 50;
 const double largePadding = 64.0;
 
 // ADRESSE API
-const String api = "http://devinstapay.pythonanywhere.com/api/v1/";
+const String api = "http://164.92.134.116/api/v1/";
 //  Adresse de l'API
 // 164.92.134.116
 // devinstapay.pythonanywhere.com

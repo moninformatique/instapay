@@ -69,7 +69,6 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
   }
 
   Container appBarBottomSection() {
-    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 30),
       width: MediaQuery.of(context).size.width,

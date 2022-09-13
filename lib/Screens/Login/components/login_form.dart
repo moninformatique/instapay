@@ -54,12 +54,11 @@ class _LoginFormState extends State<LoginForm> {
 
       try {
         debugPrint("Tentative de connexion");
-        Response response = await post(Uri.parse('${api}login/'),
-            body: jsonEncode(<String, String>{
-              "contact": emailController.text,
-              "password": passwordHashed
-            }),
-            headers: <String, String>{"Content-Type": "application/json"});
+        Response response = await post(Uri.parse('${api}login/token/'),
+            body: "email=${emailController.text}&password=$passwordHashed",
+            headers: <String, String>{
+              "Content-Type": "application/x-www-form-urlencoded"
+            });
 
         debugPrint("requete de connexion envoyée");
         debugPrint("Code de la reponse : [${response.statusCode}]");
@@ -67,7 +66,7 @@ class _LoginFormState extends State<LoginForm> {
 
         if (response.statusCode == 200) {
           debugPrint("La connexion à été éffectué");
-          createPincode(response.body.toString());
+          createPincode(emailController.text);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Row(
@@ -90,16 +89,15 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   // Fonction de chargement de la page de creation de code PIN
-  void createPincode(String jsonData) async {
+  void createPincode(String email) async {
     debugPrint(" Chargement de la page d'accueil");
 
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    await pref.setString("user", jsonData);
+    
     Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => CreatePinCode(
-                  userEmail: jsonDecode(jsonData)['contact'],
+                  userEmail: email,
                 )));
   }
 
@@ -160,7 +158,7 @@ class _LoginFormState extends State<LoginForm> {
                           obscureText: false,
                           keyboardType: TextInputType.emailAddress,
                           decoration: const InputDecoration(
-                            prefixIcon: Icon(Icons.mail_outline),
+                            prefixIcon: Icon(Icons.mail),
                             hintText: "Email",
                           ),
                           validator: (email) {
@@ -182,7 +180,7 @@ class _LoginFormState extends State<LoginForm> {
                           obscureText: obscuretext,
                           keyboardType: TextInputType.text,
                           decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.lock_outline),
+                            prefixIcon: const Icon(Icons.lock),
                             // Afficer ou cacher le mot de passe
                             suffixIcon: GestureDetector(
                               onTap: () {

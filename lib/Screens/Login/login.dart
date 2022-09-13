@@ -57,6 +57,7 @@ class _LoginScreenState extends State<LoginScreen>
       body: Stack(
         children: [
           // Décoration en fond d'écran
+          /*
           Positioned(
               top: 100,
               right: -50,
@@ -67,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen>
                     borderRadius: BorderRadius.circular(50),
                     color: kPrimaryColor),
               )),
-
+          
           Positioned(
               top: -50,
               left: -50,
@@ -78,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen>
                     borderRadius: BorderRadius.circular(100),
                     color: kPrimaryColor),
               )),
-
+          */
           // Boutton de retour lorsque le widget d'inscription est charger
           CancelButton(
             isLogin: isLogin,
@@ -139,42 +140,45 @@ class _LoginScreenState extends State<LoginScreen>
               topLeft: Radius.circular(100),
               topRight: Radius.circular(100),
             ),
-            color: kBackgroundBodyColor),
+            color: Colors.white),
         alignment: Alignment.center,
-        child: GestureDetector(
-          onTap: !isLogin
-              ? null
-              : () {
-                  animationController!.forward();
-                  setState(() {
-                    isLogin = !isLogin;
-                  });
-                },
-          child: isLogin
-              ? Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Column(
-                      children: const [
-                        Text(
-                          "Vous n'avez pas de compte ?",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 20),
+          child: GestureDetector(
+            onTap: !isLogin
+                ? null
+                : () {
+                    animationController!.forward();
+                    setState(() {
+                      isLogin = !isLogin;
+                    });
+                  },
+            child: isLogin
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Column(
+                        children: const [
+                          Text(
+                            "Vous n'avez pas de compte ?",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 15,
+                            ),
                           ),
-                        ),
-                        Text(
-                          "Inscrivez-vous",
-                          style: TextStyle(
-                              color: kPrimaryColor,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600),
-                        )
-                      ],
-                    ),
-                  ],
-                )
-              : null,
+                          Text(
+                            "Inscrivez-vous",
+                            style: TextStyle(
+                                color: kPrimaryColor,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600),
+                          )
+                        ],
+                      ),
+                    ],
+                  )
+                : null,
+          ),
         ),
       ),
     );
