@@ -3,11 +3,11 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import '../Loading/loading.dart';
 import '../Login/login.dart';
 import 'components/numeric_pad.dart';
 import 'components/top_pincode_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Home/home_screen.dart';
 import 'components/pin_widget.dart';
 import '../../components/constants.dart';
 
@@ -27,7 +27,7 @@ class CreatePinCode extends StatefulWidget {
 }
 
 class _CreatePinCodeState extends State<CreatePinCode> {
-  String userImage = "assets/logos/5-rb.png";
+  String userImage = "assets/logos/4-rb.png";
   String userMessage = "Enregistrez votre code PIN";
 
   bool codepinDisMatch = false;
@@ -55,7 +55,7 @@ class _CreatePinCodeState extends State<CreatePinCode> {
               children: [
                 // Les points de marquage d'entrer ou pas d'un chiffre du code PIN
                 PinWidget(
-                    pinLegth: 5,
+                    pinLength: 5,
                     controller: pincodeController,
                     onCompleted: (code) {
                       Navigator.push(
@@ -120,7 +120,7 @@ class SavePinCode extends StatefulWidget {
 }
 
 class _SavePinCodeState extends State<SavePinCode> {
-  String userImage = "assets/logos/5-rb.png";
+  String userImage = "assets/logos/4-rb.png";
   String userMessage = "Confirmez votre code PIN";
 
   bool codepinDisMatch = false;
@@ -143,7 +143,9 @@ class _SavePinCodeState extends State<SavePinCode> {
     Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => HomeScreen(userEmail: widget.userEmail),
+          builder: (context) => Loading(
+              userEmail:
+                  widget.userEmail) /*HomeScreen(userEmail: widget.userEmail)*/,
         ));
   }
 
@@ -169,7 +171,7 @@ class _SavePinCodeState extends State<SavePinCode> {
               children: [
                 // Les points de marquage d'entrer ou pas d'un chiffre du code PIN
                 PinWidget(
-                    pinLegth: 5,
+                    pinLength: 5,
                     controller: pincodeController,
                     onCompleted: (codePin) {
                       if (codePin == widget.pincode) {

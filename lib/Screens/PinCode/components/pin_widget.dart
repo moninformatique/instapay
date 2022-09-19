@@ -10,16 +10,16 @@ class PinController {
 }
 
 class PinWidget extends StatefulWidget {
-  final int pinLegth;
+  final int pinLength;
   final PinController controller;
   final Function(String) onCompleted;
 
   const PinWidget(
       {Key? key,
-      required this.pinLegth,
+      required this.pinLength,
       required this.controller,
       required this.onCompleted})
-      : assert(pinLegth <= 7 && pinLegth > 0),
+      : assert(pinLength <= 7 && pinLength > 0),
         super(key: key);
   @override
   _PinWidgetState createState() => _PinWidgetState(controller);
@@ -40,9 +40,9 @@ class _PinWidgetState extends State<PinWidget>
 
   void addInput(String input) async {
     pinCode += input;
-    if (pinCode.length < widget.pinLegth) {
+    if (pinCode.length < widget.pinLength) {
       _animationControllers[pinCode.length - 1].animate(input);
-    } else if (pinCode.length == widget.pinLegth) {
+    } else if (pinCode.length == widget.pinLength) {
       _animationControllers[pinCode.length - 1].animate(input);
       await Future.delayed(const Duration(milliseconds: 300));
       widget.onCompleted.call(pinCode);
@@ -67,7 +67,7 @@ class _PinWidgetState extends State<PinWidget>
   @override
   void initState() {
     super.initState();
-    _animationControllers = List.generate(widget.pinLegth, (index) {
+    _animationControllers = List.generate(widget.pinLength, (index) {
       return PinAnimationController();
     });
 
@@ -96,7 +96,7 @@ class _PinWidgetState extends State<PinWidget>
       offset: Offset(_wiggleAnimation.value, 0.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(widget.pinLegth, (index) {
+        children: List.generate(widget.pinLength, (index) {
           return PinAnimation(
             controller: _animationControllers[index],
           );

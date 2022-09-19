@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 
 import '../../components/constants.dart';
-import 'component/qrcode_container.dart';
+import 'Home/qrcode_container.dart';
 
 class ReceiveMoney extends StatefulWidget {
   final String userID;
@@ -73,7 +73,7 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
       padding: const EdgeInsets.symmetric(horizontal: 30),
       width: MediaQuery.of(context).size.width,
       decoration: const BoxDecoration(
-        color: kBackgroundColor,
+        color: kPrimaryColor,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(50),
           bottomRight: Radius.circular(50),

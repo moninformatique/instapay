@@ -24,8 +24,8 @@ class TopPincodeScreen extends StatelessWidget {
         // Logo ou Image de profile
         Image.asset(
           userImage,
-          height: 70,
-          width: 70,
+          height: 100,
+          width: 100,
         ),
 
         // Message

@@ -1,7 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 
-//------------------- Import des packages -----------------------//
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,21 +8,72 @@ import 'components/constants.dart';
 import 'Screens/Login/login.dart';
 import 'Screens/PinCode/pin_code.dart';
 
-void main() => runApp(const MyApp());
+// Définition des noms de route vers les pages qui peuvent être lancer au démarrage de laplication
+const String pinCodeScreenRoute = "pincode";
+const String loginScreenRoute = "login";
+
+// Classe qui définit les paramètres dans l'initialisation
+class InitData {
+  // Lle texte à partager avec la page suivante
+  final String sharedText;
+  // Le nom de la route suivante
+  final String routeName;
+
+  InitData(this.sharedText, this.routeName);
+}
+
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  InitData initData = await init();
+
+  runApp(MyApp(
+    initData: initData,
+  ));
+}
+
+// Cette fonction initiaise les données de l'utilisateur s'il elles existe
+// et coisi par conséquent la page qui doit être lancer
+Future<InitData> init() async {
+  String sharedText = "";
+  String routeName = loginScreenRoute;
+
+  debugPrint("[..] Recherche d'une session ");
+  // Recherche de données utilisateur enregistrée dans la memoire de l'appareil
+  SharedPreferences pref = await SharedPreferences.getInstance();
+  String? data = pref.getString("user");
+
+  if (data != null) {
+    debugPrint("[$data est déjà connecté]");
+    sharedText = data;
+    routeName = pinCodeScreenRoute;
+  } else {
+    debugPrint("[Aucun utilisateur connecté]");
+  }
+
+  debugPrint("[OK] Recherche d'une session");
+  return InitData(sharedText, routeName);
+}
 
 ///     MyApp
 ///     -----
 /// Widget racine de l'application
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class MyApp extends StatefulWidget {
+  final InitData initData;
+  const MyApp({Key? key, required this.initData}) : super(key: key);
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'instapay',
+
       // Définition de style globale
       theme: ThemeData(
           primaryColor: kSimpleTextColor,
@@ -34,73 +83,44 @@ class MyApp extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               elevation: 0,
               primary: kPrimaryColor,
-              shape: const StadiumBorder(),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
               maximumSize: const Size(double.infinity, 56),
               minimumSize: const Size(double.infinity, 56),
             ),
           ),
-          inputDecorationTheme: const InputDecorationTheme(
+          inputDecorationTheme: InputDecorationTheme(
             filled: true,
-            fillColor: kPrimaryLightColor,
-            iconColor: kPrimaryColor,
-            prefixIconColor: kPrimaryColor,
-            contentPadding: EdgeInsets.symmetric(
+            //fillColor: Color.fromARGB(255, 227, 224, 224),
+            //iconColor: kWeightBoldColor,
+            //prefixIconColor: kWeightBoldColor,
+            iconColor: Colors.grey,
+            contentPadding: const EdgeInsets.symmetric(
                 horizontal: defaultPadding / 2, vertical: defaultPadding / 2),
             border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(50)),
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide.none),
           )),
-      home: const LoadPage(),
+
+      onGenerateRoute: (RouteSettings settings) {
+        switch (settings.name) {
+          case loginScreenRoute:
+            return MaterialPageRoute(builder: (_) => const LoginScreen());
+          case pinCodeScreenRoute:
+            return MaterialPageRoute(
+                builder: (_) => PinCodeAuth(
+                      userEmail: widget.initData.sharedText,
+                    ));
+        }
+        return null;
+      },
+      initialRoute: widget.initData.routeName,
+      /*home: (isLogged)
+          ? PinCodeAuth(userEmail: userEmail.toString())
+          : const LoginScreen(),*/
     );
-  }
-}
-
-///     LoadPage
-///     --------
-///   Ce Widget a pour rôle de déterminer la page qui doit être charger deh le démarrage de l'application
-///   entre la page de connexion (LoginScreen) s'il n'existe aucun utilisateur connecté et
-///   la page d'authentification par code PIN (PinCodeAuth) s'il y a déjà un utilisateur connecté.///
-
-class LoadPage extends StatefulWidget {
-  const LoadPage({Key? key}) : super(key: key);
-
-  @override
-  State<LoadPage> createState() => _LoadPageState();
-}
-
-class _LoadPageState extends State<LoadPage> {
-  @override
-  void initState() {
-    super.initState();
-    checkSession();
-  }
-
-  // Fonction de verificatio de session existante
-  void checkSession() async {
-    // Ici nous alons obtenir les informations de l'utlisateur sauvegardées lors de l'inscription
-    // Il sont enregistré en chaine de caractère == les convertir en format json pour utiliser les données.
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    String? userEmail = pref.getString("user");
-    String? userPinCode = pref.getString("pin");
-
-    if (userEmail != null && userPinCode != null) {
-      // Il existe de données utilisateur == un utilisateur s'est déjà connecté
-
-      debugPrint("Utilisateur connecté [$userEmail] ");
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  PinCodeAuth(userContact: userEmail.toString())));
-    } else {
-      debugPrint("[Aucun utilisateur connecté] ");
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold();
   }
 }

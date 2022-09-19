@@ -1,22 +1,15 @@
-import 'dart:convert';
+//import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import '../../components/constants.dart';
+//import 'package:http/http.dart';
+//import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+//import '../../../components/constants.dart';
+import '../../../components/constants.dart';
 
 class SendMoney extends StatefulWidget {
-  final String userID;
-  final String solde;
-  final String sendCode;
-  final String receiveCode;
-  const SendMoney(
-      {Key? key,
-      required this.userID,
-      required this.solde,
-      required this.sendCode,
-      required this.receiveCode})
-      : super(key: key);
+  const SendMoney({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<SendMoney> createState() => _SendMoneyState();
@@ -27,6 +20,52 @@ class _SendMoneyState extends State<SendMoney> {
   TextEditingController amountToSendController = TextEditingController();
   String mysolde = "0";
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: appBar(context),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
+        child: Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: kToolbarHeight,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  AppBar appBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      centerTitle: true,
+      title: const Text(
+        "Envoi d'argent",
+        style: TextStyle(
+          color: kPrimaryColor,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      leading: IconButton(
+        onPressed: () {
+          Navigator.pop(context);
+        },
+        icon: const Icon(
+          Icons.arrow_back,
+          color: kPrimaryColor,
+        ),
+      ),
+    );
+  }
+
+/*
   void accountRequest(String userID) async {
     Map<String, dynamic> account = jsonDecode("{}");
 
@@ -71,86 +110,7 @@ class _SendMoneyState extends State<SendMoney> {
     );
   }
 
-  Container appBarBottomSection() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 30),
-      width: MediaQuery.of(context).size.width,
-      decoration: const BoxDecoration(
-        color: kBackgroundColor,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(50),
-          bottomRight: Radius.circular(50),
-        ),
-      ),
-      child: Column(
-        children: <Widget>[
-          const SizedBox(
-            height: 10,
-          ),
-          Container(
-            height: 150,
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-              color: kWeightBoldColor,
-              borderRadius: BorderRadius.circular(30),
-              border:
-                  Border.all(color: kPrimaryColor.withOpacity(0.1), width: 2),
-              boxShadow: [
-                BoxShadow(
-                  color: kSimpleTextColor.withOpacity(0.4),
-                  offset: const Offset(0, 8),
-                  blurRadius: 10,
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Vous disposez de',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    height: 1,
-                  ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      widget.solde,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 30,
-                        fontWeight: FontWeight.w600,
-                        height: 0.9,
-                      ),
-                    ),
-                    const Text(
-                      ' Fcfa',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w500,
-                        height: 1,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(
-            height: 50,
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Expanded mainBody() {
     return Expanded(
@@ -295,4 +255,5 @@ class _SendMoneyState extends State<SendMoney> {
       ),
     );
   }
+*/
 }

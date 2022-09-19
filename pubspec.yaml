@@ -49,6 +49,7 @@ dependencies:
   lottie: ^1.4.2
   skeletons: ^0.0.3
   cached_network_image: ^3.2.1
+  connectivity_plus: ^2.3.7
   
 
 dev_dependencies:

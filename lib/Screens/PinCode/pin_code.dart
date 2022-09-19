@@ -3,7 +3,8 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
-import 'create_pin_code.dart';
+import 'package:http/http.dart';
+import '../../components/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'components/numeric_pad.dart';
@@ -19,8 +20,8 @@ import '../Login/login.dart';
 /// le permettra d'acceder à la page d'accueil de l'application.
 
 class PinCodeAuth extends StatefulWidget {
-  final String userContact;
-  const PinCodeAuth({Key? key, required this.userContact}) : super(key: key);
+  final String userEmail;
+  const PinCodeAuth({Key? key, required this.userEmail}) : super(key: key);
 
   @override
   State<PinCodeAuth> createState() => _PinCodeAuthState();
@@ -29,7 +30,6 @@ class PinCodeAuth extends StatefulWidget {
 class _PinCodeAuthState extends State<PinCodeAuth> {
   bool forgetPin = false;
   PinController pincodeController = PinController();
-  List<int> firstRow = [1, 2, 3], secondRow = [4, 5, 6], thirdRow = [7, 8, 9];
 
   // Fonction de vérification de l'exactitude du code PIN entré
   verifyCodePin(String code) async {
@@ -50,33 +50,25 @@ class _PinCodeAuthState extends State<PinCodeAuth> {
 
         if (userEmail != null) {
           //Map<String, dynamic> userData = jsonDecode(savedData);
-          Navigator.push(
+          for (var i = 0; i < 5; i++) {
+            pincodeController.delete();
+          }
+          Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(
-                  builder: (context) => HomeScreen(userEmail: userEmail)));
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+              (route) => false);
         }
       } else {
         // le code PIN entré est incorret
         debugPrint("Le code PIN est incorrecte");
         pincodeController.notifyWrongInput();
         forgetPin = true;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [Text("Mauvais code PIN")],
-        )));
       }
     } else {
       // Aucun code PIN n'a été enregistré, conduire l'utilisateur à la page de connexion
       debugPrint("Aucun code PIN n'as été enregistré");
-      await pref.clear();
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CreatePinCode(
-              userEmail: widget.userContact,
-            ),
-          ));
+
+      logout();
     }
     setState(() {});
   }
@@ -84,11 +76,72 @@ class _PinCodeAuthState extends State<PinCodeAuth> {
   // Fonction de décconexio de l'utilisateur connecté
   void logout() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    await pref.clear();
-    debugPrint("Déconnexon de l'utilisateur ...");
+    String? tokenData = pref.getString("token");
+    debugPrint(tokenData);
+    var jsonTokenData = jsonDecode(tokenData!);
 
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+    debugPrint("Déconnexon de l'utilisateur ...");
+    
+    try {
+      Response response =
+          await post(Uri.parse('${api}login/second_authentication/'),
+              body: jsonEncode(<String, dynamic>{
+                "refresh": jsonTokenData["refresh"],
+              }),
+              headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer ${jsonTokenData["access"]}"
+          });
+
+      debugPrint("  --> Code de la reponse : [${response.statusCode}]");
+      debugPrint("  --> Contenue de la reponse : ${response.body}");
+      if (response.statusCode == 200) {
+        await pref.clear();
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+            (route) => false);
+      } else {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+            (route) => false);
+      }
+    } catch (e) {
+      showInformation(context, false, "Vérifiez votre connexion internet");
+    }
+  }
+
+  // Affiche des informations en rapport avec les resultats des requetes à l'utilisateur
+  showInformation(BuildContext context, bool isSuccess, String message) {
+    return ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Row(
+        children: [
+          Icon(
+            isSuccess ? Icons.check_circle : Icons.error,
+            color: Colors.white,
+            size: 20,
+          ),
+          const SizedBox(
+            width: 20,
+          ),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          )
+        ],
+      ),
+      //behavior: SnackBarBehavior.floating,
+      backgroundColor: isSuccess ? successColor : errorColor,
+      //elevation: 3,
+    ));
   }
 
   @override
@@ -110,15 +163,15 @@ class _PinCodeAuthState extends State<PinCodeAuth> {
                   },
                   child: const Text(
                     "Déconnexion",
-                    style: TextStyle(color: Colors.red, fontSize: 10),
+                    style: TextStyle(color: Colors.red, fontSize: 12),
                   )),
             ],
           ),
 
           // Partie supérieur de la page
           TopPincodeScreen(
-            userEmail: widget.userContact,
-            userImage: "assets/logos/5-rb.png",
+            userEmail: widget.userEmail,
+            userImage: "assets/logos/4-rb.png",
             userMessage: "Bon retour",
           ),
 
@@ -128,7 +181,7 @@ class _PinCodeAuthState extends State<PinCodeAuth> {
             child: Column(
               children: [
                 PinWidget(
-                    pinLegth: 5,
+                    pinLength: 5,
                     controller: pincodeController,
                     onCompleted: (pincode) {
                       verifyCodePin(pincode);
@@ -142,7 +195,7 @@ class _PinCodeAuthState extends State<PinCodeAuth> {
               ? TextButton(
                   onPressed: () {},
                   child: const Text("Code Pin oublié ?",
-                      style: TextStyle(color: Colors.black, fontSize: 12)),
+                      style: TextStyle(color: kWeightBoldColor, fontSize: 12)),
                 )
               : Container(),
 
