@@ -52,10 +52,17 @@ class SettingScreen extends StatelessWidget {
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+<<<<<<< HEAD
 import '../Login/login.dart';
 import 'change_password.dart';
 import 'userInformations.dart';
 import '../../components/constants.dart';
+=======
+import 'package:instapay_master/Screens/Login/login.dart';
+import 'changePasswd.dart';
+import 'userInformations.dart';
+import 'package:instapay_master/components/constants.dart';
+>>>>>>> c4ee9f80b9f545db8351d78b43476cfc88dac89f
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
@@ -141,14 +148,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     debugPrint("l'index est : $index");
     try {
       Response response = index == 1
-          ? await patch(Uri.parse("${api}users/security/?account_protection=1"),
+          ? await patch(Uri.parse("${api}users/security/?account_protection=0"),
               body: jsonEncode(
                   <String, dynamic>{"account_protection_code": code}),
               headers: {
                   "Content-type": "application/json",
                   "Authorization": "Bearer ${tokens['access']}"
                 })
-          : await patch(Uri.parse("${api}users/security/?account_protection=0"),
+          : await patch(Uri.parse("${api}users/security/?account_protection=1"),
               body: jsonEncode(
                   <String, dynamic>{"account_protection_code": code}),
               headers: {
@@ -339,9 +346,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     labels: const ['On', 'Off'],
                     initialLabelIndex:
                         userAccountsInfo['account_protection'].toString() ==
-                                "false"
-                            ? optSecured
-                            : 0,
+                                "true"
+                            ? 0
+                            : 1,
                     onToggle: (index) async {
                       await showDialog(
                           context: context,
