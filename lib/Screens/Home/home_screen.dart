@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:instapay_master/Screens/Settings/settings.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../MainPages/Home/home.dart';
-import '../MainPages/SendMoney/send_money.dart';
+import '../MainPages/Payment/payment.dart';
+import '../Settings/settings.dart';
 import '../../components/constants.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -51,9 +52,12 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: kPrimaryColor,
         onPressed: () {
           Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const SendMoney()));
+              MaterialPageRoute(builder: (context) => const Payment()));
         },
-        child: const Icon(Icons.send_outlined),
+        child: SvgPicture.asset(
+          "assets/icons/transactions-icon.svg",
+          color: Colors.white,
+        ),
       ),
     );
   }

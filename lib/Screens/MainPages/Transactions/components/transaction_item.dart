@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:instapay_master/Screens/MainPages/Transactions/transaction_details.dart';
+import '../transaction_details.dart';
 import '../../../../components/constants.dart';
 
 class TransactionItem extends StatelessWidget {
