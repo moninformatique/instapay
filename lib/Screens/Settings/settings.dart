@@ -52,10 +52,10 @@ class SettingScreen extends StatelessWidget {
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
-import 'package:instapay/Screens/Login/login.dart';
+import '../Login/login.dart';
 import 'changePasswd.dart';
 import 'userInformations.dart';
-import 'package:instapay/components/constants.dart';
+import '../../components/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 

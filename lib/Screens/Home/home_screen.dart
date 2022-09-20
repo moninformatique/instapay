@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:instapay_master/Screens/Settings/settings.dart';
 import '../MainPages/Home/home.dart';
 import '../MainPages/SendMoney/send_money.dart';
 import '../../components/constants.dart';
@@ -14,7 +15,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int selectedScreenIndex = 0;
   List<Widget> screenList = [
     const Home(),
-    const Page(title: "Paramètres"),
+    const SettingsScreen(),
+    //const Page(title: "Paramètres"),
   ];
 
   @override
