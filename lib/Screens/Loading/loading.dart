@@ -1,4 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../components/constants.dart';
 
 import '../Home/home_screen.dart';
@@ -15,13 +20,30 @@ class _LoadingState extends State<Loading> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 5), () {
+    Future.delayed(const Duration(seconds: 3), () {
       debugPrint("Executed after 5 seconds");
+
+      goToHomeScreen();
+    });
+  }
+
+  goToHomeScreen() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String? tokens = pref.getString("token");
+
+    if (tokens != null) {
+      var token = jsonDecode(tokens);
+      debugPrint(token["access"]);
       Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(
+              builder: (context) => HomeScreen(
+                    token: token["access"],
+                  )),
           (route) => false);
-    });
+    } else {
+      await pref.clear();
+    }
   }
 
   @override

@@ -140,6 +140,7 @@ class _LoginFormState extends State<LoginForm> {
 
                           const SizedBox(height: defaultPadding),
                           // Champ du mot de passe
+
                           TextFormField(
                             controller: passwordController,
                             obscureText: obscuretext,
@@ -153,8 +154,8 @@ class _LoginFormState extends State<LoginForm> {
                                   });
                                 },
                                 child: Icon(obscuretext
-                                    ? Icons.visibility
-                                    : Icons.visibility_off),
+                                    ? Icons.visibility_off
+                                    : Icons.visibility),
                               ),
                               hintText: "Mot de passe",
                             ),

@@ -53,10 +53,22 @@ class _PinCodeAuthState extends State<PinCodeAuth> {
           for (var i = 0; i < 5; i++) {
             pincodeController.delete();
           }
-          Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
-              (route) => false);
+          String? tokens = pref.getString("token");
+          if (tokens != null) {
+            var token = jsonDecode(tokens);
+            debugPrint(token["access"]);
+            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => HomeScreen(
+                          token: token["access"],
+                        )),
+                (route) => false);
+          } else {
+            logout();
+          }
+        } else {
+          logout();
         }
       } else {
         // le code PIN entré est incorret
@@ -81,7 +93,7 @@ class _PinCodeAuthState extends State<PinCodeAuth> {
     var jsonTokenData = jsonDecode(tokenData!);
 
     debugPrint("Déconnexon de l'utilisateur ...");
-    
+
     try {
       Response response =
           await post(Uri.parse('${api}login/second_authentication/'),

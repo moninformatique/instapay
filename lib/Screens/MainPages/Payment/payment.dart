@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import './ResquestPayment/request_payment.dart';
 import './ScheduleSendMoney/schedule_send_money.dart';
 import './SendMoney/send_money.dart';
@@ -7,7 +10,11 @@ import '../../../components/constants.dart';
 import 'components/action_box.dart';
 
 class Payment extends StatefulWidget {
-  const Payment({Key? key}) : super(key: key);
+  final double balance;
+  final bool accoutProtection;
+  const Payment(
+      {Key? key, required this.balance, required this.accoutProtection})
+      : super(key: key);
 
   @override
   State<Payment> createState() => _PaymentState();
@@ -17,6 +24,13 @@ class _PaymentState extends State<Payment> {
   TextEditingController destinationAddressController = TextEditingController();
   TextEditingController amountToSendController = TextEditingController();
   String mysolde = "0";
+  Map<String, dynamic> tokens = {};
+
+  @override
+  void initState() {
+    getTokens();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,8 +88,11 @@ class _PaymentState extends State<Payment> {
           icon: Icons.send,
           bgColor: green,
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const SendMoney()));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        SendMoney(balance: widget.balance, tokens: tokens)));
           },
         )),
         const SizedBox(
@@ -90,7 +107,8 @@ class _PaymentState extends State<Payment> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const ScheduleSendMoney()));
+                    builder: (context) => ScheduleSendMoney(
+                        balance: widget.balance, tokens: tokens)));
           },
         )),
         const SizedBox(
@@ -105,10 +123,27 @@ class _PaymentState extends State<Payment> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const RequestPayment()));
+                    builder: (context) => RequestPayment(
+                          tokens: tokens,
+                        )));
           },
         )),
       ],
     );
+  }
+
+  getTokens() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+
+    String? data = pref.getString("token");
+    debugPrint("************************  GET TOKEN *******************");
+    if (data != null) {
+      setState(() {
+        debugPrint("********************setstate***********************");
+        tokens = jsonDecode(data);
+        debugPrint("$tokens");
+      });
+    }
+    debugPrint("*******************************************");
   }
 }

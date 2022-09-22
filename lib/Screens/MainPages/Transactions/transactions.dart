@@ -1,11 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 
 import '../../../components/constants.dart';
 import 'components/search_bar.dart';
-import 'components/transaction_item.dart';
 
 class Transactions extends StatefulWidget {
-  const Transactions({Key? key}) : super(key: key);
+  final String token;
+  const Transactions({Key? key, required this.token}) : super(key: key);
 
   @override
   State<Transactions> createState() => _TransactionsState();
@@ -18,6 +21,17 @@ class _TransactionsState extends State<Transactions> {
   static int entrant = 1;
   static int sortant = 2;
   List navBarIndex = [0, 1, 2];
+  var inTransactions;
+  var outTransactions;
+
+  @override
+  void initState() {
+    setState(() {
+      getTransactions(widget.token);
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -228,7 +242,7 @@ class _TransactionsState extends State<Transactions> {
         SizedBox(
           height: defaultPadding / 2,
         ),
-
+/*
         // Lites de transactions à cette date
         TransactionItem(
           imageUrl: "assets/images/orange.png",
@@ -296,6 +310,7 @@ class _TransactionsState extends State<Transactions> {
           status: "received",
           amount: "36.00",
         ),
+*/
       ],
     );
   }
@@ -330,7 +345,7 @@ class _TransactionsState extends State<Transactions> {
         SizedBox(
           height: defaultPadding / 2,
         ),
-
+/*
         // Liste de transactions à cette date
         TransactionItem(
           imageUrl: "assets/images/orange.png",
@@ -380,6 +395,8 @@ class _TransactionsState extends State<Transactions> {
           status: "received",
           amount: "36.00",
         ),
+
+*/
       ],
     );
   }
@@ -414,7 +431,7 @@ class _TransactionsState extends State<Transactions> {
         SizedBox(
           height: defaultPadding / 2,
         ),
-
+/*
         // Liste des transactions à une date
         TransactionItem(
           imageUrl: "assets/images/orange.png",
@@ -470,7 +487,37 @@ class _TransactionsState extends State<Transactions> {
           status: "sended",
           amount: "36.00",
         ),
+*/
       ],
     );
+  }
+
+  getTransactions(String token) async {
+    try {
+      Response response = await get(Uri.parse('${api}users/transactions/'),
+          headers: {"Authorization": "Bearer $token"});
+
+      debugPrint("  --> Code de la reponse : [${response.statusCode}]");
+      debugPrint("  --> Contenue de la reponse : ${response.body}");
+
+      if (response.statusCode == 200) {
+        setState(() {
+          var transactions = jsonDecode(response.body);
+          inTransactions = transactions["sender"];
+          outTransactions = transactions["recipient"];
+        });
+      } else {
+        setState(() {
+          inTransactions = null;
+          outTransactions = null;
+        });
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      setState(() {
+        inTransactions = null;
+        outTransactions = null;
+      });
+    }
   }
 }

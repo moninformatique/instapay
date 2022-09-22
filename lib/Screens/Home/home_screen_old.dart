@@ -5,10 +5,10 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 //import 'package:http/http.dart';
-import 'package:instapay_master/Screens/Login/login.dart';
+import 'package:instapay/Screens/Login/login.dart';
 //import 'package:internet_connection_checker/internet_connection_checker.dart';
 
-import 'package:instapay_master/components/constants.dart';
+import 'package:instapay/components/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 const primary = Colors.black;
 const secondary = Colors.white;
 const mainColor = Color(0xFF000000);
@@ -44,16 +45,6 @@ const String apiDomain = "http://164.92.134.116/api/v1/";
 // devinstapay.pythonanywhere.com
 
 const int pinLenght = 5;
-
-class Test {
-  void debug() {
-    debugPrint("Hello world");
-  }
-}
-
-class Api {
-  String variable = "un endpoints";
-}
 
 class Bottom {
   static int home = 0;
@@ -103,8 +94,6 @@ class ThemeColors {
   static Color grey = const Color(0xFF8492A2);
 }
 
-
-
 /*
 
 {"refresh":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY2MzYyMzkyNSwianRpIjoiYjA0MWNlOWI2MmZhNDllMTlmNWZmYmM0MmViY2YyMjQiLCJ1c2VyX2lkIjoyNH0.StJwYDzS9hFiraIVFbhttZqpVGZ0oLZ3x2s8Ko17Va4","access":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjYzNTY3NTI1LCJqdGkiOiIzZTQyNmY0N2VlOWY0ODhkYjlhODM3NjRiNGQ2Njg4MSIsInVzZXJfaWQiOjI0fQ.GEtSxpcr8VyRaxLd4RM--pkEpKCJffBSn394Setxysg"}
@@ -125,3 +114,7 @@ double height2 = height - padding.top;
 // Height (without status and toolbar)
 double height3 = height - padding.top - kToolbarHeight;
 */
+
+class Api {
+  static String domain = " ";
+}

@@ -349,7 +349,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                                 loading2 = false;
                               });
                               debugPrint("[X] Mots de passe difféérents ");
-                              debugPrint(Api().variable);
+
                               showInformation(
                                   context, false, "Mots de passe différents");
                             }

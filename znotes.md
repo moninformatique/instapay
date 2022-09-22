@@ -56,7 +56,7 @@ Une transaction peut être :
  Lien : (Post) http://164.92.134.116/api/v1/active_my_account/761535/
 
 
-# CONECTION
+# CONNECTION
 -----------
  - Lien : (Post) http://164.92.134.116/api/v1/login/token/
  
@@ -264,9 +264,9 @@ Une transaction peut être :
     }
 
   Réponses :
-        {
-          "success":"Transactions reussie"
-        }
+    {
+      "success":"Transactions reussie"
+    }
 
 
 # AFFICHER LA LISTE DES TRANSACTIONS
@@ -296,7 +296,18 @@ Une transaction peut être :
         "sender": 28,
         "recipient": 14
       }
+      
     ]
+
+    "recipient": [{
+        "id": 4,
+        "amount": 1010.0,
+        "datetime_transfer": "2022-09-21T00:00:00Z",
+        "status": true,
+        "state": "1",
+        "sender": 34,
+        "recipient": 24
+    }]
 
 # REQUETE DE PAIEMENT
 ---------------------

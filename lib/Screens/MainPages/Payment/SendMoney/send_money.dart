@@ -1,36 +1,90 @@
-import 'package:email_validator/email_validator.dart';
+import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:email_validator/email_validator.dart';
+import 'package:http/http.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../components/constants.dart';
+import '../components/accounting.dart';
+import '../components/protection_code_screen.dart';
 
 class SendMoney extends StatefulWidget {
-  const SendMoney({
-    Key? key,
-  }) : super(key: key);
+  final double balance;
+  final String receiptEmail;
+  final Map<String, dynamic> tokens;
+  const SendMoney(
+      {Key? key,
+      required this.balance,
+      required this.tokens,
+      this.receiptEmail = ""})
+      : super(key: key);
 
   @override
   State<SendMoney> createState() => _SendMoneyState();
 }
 
 class _SendMoneyState extends State<SendMoney> {
+  // Clé du formulaire d'envoi d'argent
   final formKey = GlobalKey<FormState>();
+
+  // Controlleur des champ du formulaire
   TextEditingController receiptAddressController = TextEditingController();
   TextEditingController amountController = TextEditingController();
-  TextEditingController amountToSendController = TextEditingController();
-  String mysolde = "0";
+
+  // Frais de la transaction montant à envoyer multiplier par 1%
+  double transactionFees = 0.0;
+  // Montant total à préléver du compte de l'utilisateur
+  double amountToSend = 0.0;
+
   bool loading = false;
+  bool checkBoxSelected = false;
+  bool submitEnabled = false;
+  bool emailIsValid = false;
+  bool amountIsValid = false;
+  bool accountProtection = false;
+  String date = "";
 
   @override
   void initState() {
     super.initState();
+    getAccountProtection();
+    debugPrint("########## ${widget.receiptEmail} ##############");
+    receiptAddressController.text = widget.receiptEmail;
+
+    receiptAddressController.addListener(() {
+      setState(() {
+        if (EmailValidator.validate(receiptAddressController.text)) {
+          emailIsValid = true;
+        } else {
+          emailIsValid = false;
+        }
+      });
+    });
+
     amountController.addListener(() {
       var amount = amountController.text;
+
       setState(() {
         if (amount.isNotEmpty) {
-          amountToSendController.text =
-              "${double.parse(amount) + (double.parse(amount) * 0.01)}";
+          // Frais de la transaction
+          transactionFees = double.parse(amount) * TransfertFees.instapay;
+
+          amountToSend = double.parse(amount) + transactionFees;
+
+          debugPrint("${(amountToSend < widget.balance)}");
+          debugPrint("${(int.parse(amount) % 100 == 0)}");
+          debugPrint("${receiptAddressController.text.isNotEmpty}");
+          if (((amountToSend < widget.balance) &&
+              (int.parse(amount) % 100 == 0) &&
+              receiptAddressController.text.isNotEmpty)) {
+            amountIsValid = true;
+          } else {
+            amountIsValid = false;
+          }
         } else {
-          amountToSendController.clear();
+          amountToSend = 0.0;
+          submitEnabled = false;
         }
       });
     });
@@ -53,18 +107,20 @@ class _SendMoneyState extends State<SendMoney> {
               const SizedBox(
                 height: defaultPadding,
               ),
+
+              // Informations sur l'opérateur du transfert
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // Information sur l'opérateur du transfert
                   Container(
                     padding: const EdgeInsets.all(5),
                     decoration: const BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.all(Radius.circular(20))),
                     child: Row(
-                      //mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Logo sur la carte
+                        // Logo de l'opérateur
                         Container(
                           height: 30,
                           width: 30,
@@ -81,6 +137,8 @@ class _SendMoneyState extends State<SendMoney> {
                         const SizedBox(
                           width: 10,
                         ),
+
+                        // Nom de l'opérateur
                         const Text(
                           "InstaPay",
                           style: TextStyle(
@@ -95,6 +153,23 @@ class _SendMoneyState extends State<SendMoney> {
               const SizedBox(
                 height: defaultPadding,
               ),
+
+              // Informations sur le solde
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Votre sole : "),
+                  Text(
+                    "${widget.balance} Fcfa",
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: defaultPadding,
+              ),
+
+              // Formulaire d'envoi d'argent
               sendMoneyForm(),
             ],
           ),
@@ -134,28 +209,27 @@ class _SendMoneyState extends State<SendMoney> {
         autovalidateMode: AutovalidateMode.onUserInteraction,
         child: Column(
           children: [
-            // CAdresse mail du destinataire
+            // Adresse mail du destinataire
             TextFormField(
-              onChanged: (value) {},
               controller: receiptAddressController,
               keyboardType: TextInputType.emailAddress,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.alternate_email),
-                hintText: "Email du recepteur",
+                hintText: "Email du bénéficiaire",
               ),
               validator: (email) {
                 return email != null && !EmailValidator.validate(email)
-                    ? "Adresse mail invalide"
+                    ? "Email invalide"
                     : null;
               },
             ),
+
             const SizedBox(
               height: defaultPadding,
             ),
 
             // Montant à transférer
             TextFormField(
-              onChanged: (value) {},
               controller: amountController,
               keyboardType: TextInputType.number,
               inputFormatters: [
@@ -172,252 +246,236 @@ class _SendMoneyState extends State<SendMoney> {
               ),
               validator: (amount) {
                 return amount != null && amount.isNotEmpty
-                    ? !(int.parse(amount) % 100 == 0)
-                        ? "Doit être un multiple de 100"
-                        : null
+                    ? (amountToSend > widget.balance)
+                        ? "Solde insuffisant"
+                        : !(int.parse(amount) % 100 == 0)
+                            ? "Doit être multiple de 100"
+                            : null
                     : null;
               },
             ),
 
-            const SizedBox(
-              height: defaultPadding,
-            ),
+            // Confirmer le paiement des frais de retrait
+            Row(
+              children: [
+                Checkbox(
+                    activeColor: kPrimaryColor,
+                    value: checkBoxSelected,
+                    onChanged: (value) {
+                      setState(() {
+                        if (value != null) {
+                          checkBoxSelected = value;
+                          if (checkBoxSelected) {
+                            amountToSend += MoneyWithdrawalFees.instapay;
+                          } else {
+                            amountToSend -= MoneyWithdrawalFees.instapay;
+                          }
 
-            // Montant à transférer + frais
-            TextFormField(
-              onChanged: (value) {},
-              controller: amountToSendController,
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(10),
-                FilteringTextInputFormatter.digitsOnly
-              ],
-              decoration: InputDecoration(
-                filled: false,
-                prefixIcon: const Icon(Icons.currency_franc),
-                label: Text(
-                  "Montant credité",
-                  style: TextStyle(color: Colors.grey.shade600),
+                          emailIsValid = EmailValidator.validate(
+                                  receiptAddressController.text)
+                              ? true
+                              : false;
+                          if (amountController.text.isNotEmpty) {
+                            amountIsValid = ((amountToSend < widget.balance) &&
+                                    (int.parse(amountController.text) % 100 ==
+                                        0) &&
+                                    receiptAddressController.text.isNotEmpty)
+                                ? true
+                                : false;
+                          } else {
+                            amountIsValid = false;
+                          }
+                        }
+                      });
+                    }),
+                const SizedBox(
+                  width: 5,
                 ),
-              ),
+                const Text("Je paie les frais de retrait")
+              ],
             ),
 
-            const SizedBox(height: bigMediumPadding),
+            const SizedBox(height: bigMediumPadding * 4),
 
-            loading
+            const Divider(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Frais de retrait : ",
+                  style: TextStyle(fontSize: 12),
+                ),
+                Text(
+                    "${checkBoxSelected ? MoneyWithdrawalFees.instapay : 0.0} Fcfa",
+                    style: const TextStyle(fontSize: 12)),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Frais de l'opération : ",
+                  style: TextStyle(fontSize: 12),
+                ),
+                Text("$transactionFees Fcfa",
+                    style: const TextStyle(fontSize: 12)),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Montant total à payer : ",
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: (emailIsValid && amountIsValid)
+                          ? successColor
+                          : errorColor),
+                ),
+                Text("$amountToSend Fcfa",
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: (emailIsValid && amountIsValid)
+                            ? successColor
+                            : errorColor)),
+              ],
+            ),
+            const Divider(),
+
+            const SizedBox(height: defaultPadding),
+            /*loading
                 ? const CircularProgressIndicator(
                     color: kPrimaryColor,
                     strokeWidth: 5,
                   )
-                :
-                // Boutton de connexion
-                ElevatedButton(
-                    style: ElevatedButton.styleFrom(onSurface: kPrimaryColor),
-                    onPressed: () async {
-                      final isValidForm = formKey.currentState!.validate();
-                      if (isValidForm) {
-                        setState(() {
-                          loading = true;
-                        });
-                        debugPrint("Formulaire valide ... ");
+                :*/
+            // Boutton de connexion
+
+            ElevatedButton(
+                style: ElevatedButton.styleFrom(onSurface: kPrimaryColor),
+                onPressed: (emailIsValid && amountIsValid)
+                    ? () async {
+                        final isValidForm = formKey.currentState!.validate();
+                        if (isValidForm) {
+                          setState(() {
+                            //loading = true;
+                          });
+                          debugPrint(
+                              "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&Formulaire valide ... ");
+                          if (accountProtection) {
+                            var data = {
+                              "receiver": receiptAddressController.text,
+                              "amount": amountToSend,
+                              "date": date
+                            };
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ProtectionCodeScreen(
+                                          data: data,
+                                          tokens: widget.tokens,
+                                        )));
+                          } else {
+                            sendMoneyToSomeone();
+                          }
+                        }
                       }
-                    },
-                    child: Text("Confirmer".toUpperCase())),
+                    : null,
+                child: Text("Confirmer".toUpperCase())),
           ],
         ),
       ),
     );
   }
-}
 
-/*
-  void accountRequest(String userID) async {
-    Map<String, dynamic> account = jsonDecode("{}");
+  getAccountProtection() async {
+    debugPrint(
+        "################ GET ACCOUNT PROTECTION##########################");
+    debugPrint("${widget.tokens}");
+    try {
+      Response response = await get(Uri.parse('${api}users/accounts/'),
+          headers: {"Authorization": "Bearer ${widget.tokens['access']}"});
 
-    debugPrint("Tentative de recupération des infos solde");
-    Response response = await get(Uri.parse('${api}users/$userID/accounts/'));
+      debugPrint("  --> Code de la reponse : [${response.statusCode}]");
+      debugPrint("  --> Contenue de la reponse : ${response.body}");
 
-    debugPrint("Code de la reponse : [${response.statusCode}]");
-    debugPrint("Contenue de la reponse : ${response.body}");
+      if (response.statusCode == 200) {
+        var result = jsonDecode(response.body);
 
-    if (response.statusCode == 200) {
-      String userAccountData = response.body.toString();
-      Map<String, dynamic> tmp = jsonDecode(userAccountData);
-
-      account = tmp['account_owner'][0];
-      debugPrint("Retour du solde du client");
-      mysolde = account['amount'].toString();
-    } else {
-      debugPrint("La requete e échouée");
-      mysolde = "0";
+        setState(() {
+          debugPrint("Initialisation de accountProtection");
+          accountProtection = result["account_protection"];
+          debugPrint(
+              " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@à ACCOUNT PROTECTION $accountProtection @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        });
+      }
+    } catch (e) {
+      debugPrint(e.toString());
     }
-    setState(() {});
+    debugPrint("##########################################");
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  void getDate() {
+    debugPrint("DATE");
+    var now = DateTime.now();
+    var dtFormatted = DateFormat('yyyy-MM-dd');
+    setState(() {
+      date = dtFormatted.format(now);
+      debugPrint(date);
+    });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    //accountRequest(widget.userID);
-    return Scaffold(
-      body: Column(
-        children: <Widget>[
-          appBarBottomSection(),
-          const SizedBox(
-            height: 20,
-          ),
-          mainBody(),
-        ],
-      ),
-    );
+  sendMoneyToSomeone() async {
+    debugPrint("DATE");
+    var now = DateTime.now();
+    var dtFormatted = DateFormat('yyyy-MM-dd');
+    setState(() {
+      date = dtFormatted.format(now);
+      debugPrint(date);
+    });
+    try {
+      Response response = await post(Uri.parse("${api}users/transactions/"),
+          headers: {
+            "Authorization": "Bearer ${widget.tokens['access']}",
+            "Content-type": "application/json"
+          },
+          body: jsonEncode({
+            "receiver": receiptAddressController.text,
+            "amount": amountToSend,
+            "date": date
+          }));
+
+      if (response.statusCode == 200) {
+        debugPrint("paiement éffectué");
+        debugPrint('le contenu de la reponse : ${response.body}');
+        openDialog("Transaction éffectué", true);
+      } else {
+        debugPrint("echec du paiement : ${response.body}");
+        openDialog("Transaction echouée", false);
+      }
+    } catch (e) {
+      debugPrint("erreur : ${e.toString()}");
+    }
   }
 
-
-
-  Expanded mainBody() {
-    return Expanded(
-      child: Column(
-        children: [
-          Form(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  vertical: defaultPadding, horizontal: defaultPadding),
+  Future openDialog(String message, bool status) => showDialog(
+      context: context,
+      builder: ((context) => AlertDialog(
+            content: Container(
+              height: 150,
               child: Column(
                 children: [
-                  TextFormField(
-                    controller: destinationAddressController,
-                    textInputAction: TextInputAction.next,
-                    cursorColor: kPrimaryColor,
-                    //onSaved: (email) {},
-                    decoration: InputDecoration(
-                      hintText: "Adresse du destinataire",
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: const BorderSide(color: kPrimaryColor)),
-                      prefixIcon: const Padding(
-                        padding: EdgeInsets.all(defaultPadding),
-                        child: Icon(Icons.qr_code),
-                      ),
-                    ),
+                  Icon(
+                    status ? Icons.check_circle : Icons.error,
+                    color: status ? successColor : errorColor,
+                    size: 100,
                   ),
                   const SizedBox(
                     height: defaultPadding,
                   ),
-                  TextFormField(
-                    controller: amountToSendController,
-                    textInputAction: TextInputAction.done,
-                    cursorColor: kPrimaryColor,
-                    decoration: InputDecoration(
-                      hintText: "Montant à transferer",
-                      prefixIcon: const Padding(
-                        padding: EdgeInsets.all(defaultPadding),
-                        child: Icon(Icons.currency_franc),
-                      ),
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: const BorderSide(color: kPrimaryColor)),
-                    ),
-                  ),
-                  const SizedBox(height: defaultPadding),
-                  /*
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text("Montant restant"),
-                      Text(
-                          "${double.parse(widget.solde) - double.parse((amountToSendController.text.isNotEmpty) ? amountToSendController.text : "0.0")}"),
-                    ],
-                  ),*/
-                  const SizedBox(height: defaultPadding * 2),
-                  FloatingActionButton(
-                    backgroundColor: kPrimaryColor,
-                    onPressed: () async {
-                      String response = await FlutterBarcodeScanner.scanBarcode(
-                          '#ffffff', 'retour', true, ScanMode.QR);
-                      debugPrint(
-                          "==========================================================================================");
-                      debugPrint(response);
-                    },
-                    child: const Icon(
-                      Icons.qr_code_scanner_outlined,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: defaultPadding * 2),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: defaultPadding,
-                        horizontal: defaultPadding * 3),
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        if (int.parse(widget.solde) >
-                            int.parse((amountToSendController.text.isNotEmpty)
-                                ? amountToSendController.text
-                                : "0")) {
-                          if (widget.receiveCode !=
-                              destinationAddressController.text) {
-                            try {
-                              debugPrint("Tentative d'envoie d'argent");
-                              Response response = await post(
-                                  Uri.parse('${api}transactions/'),
-                                  body: jsonEncode(<String, String>{
-                                    "user_id": widget.userID,
-                                    "send_code": widget.sendCode,
-                                    "receive_code":
-                                        destinationAddressController.text,
-                                    "amount": amountToSendController.text
-                                  }),
-                                  headers: <String, String>{
-                                    "Content-Type": "application/json"
-                                  });
-
-                              debugPrint(
-                                  "Code de la reponse : [${response.statusCode}]");
-                              debugPrint(
-                                  "Contenue de la reponse : ${response.body}");
-
-                              if (response.statusCode == 200) {
-                                debugPrint("Transaction reussie");
-                              } else {
-                                debugPrint("Transaction échouée");
-                              }
-                            } catch (e) {
-                              debugPrint(e.toString());
-                            }
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [Text("Transaction inutile")],
-                            )));
-                          }
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Text("Votre solde est insuffisant")
-                            ],
-                          )));
-                        }
-                      },
-                      child: const Text(
-                        "Envoyer",
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: defaultPadding),
+                  Text(message),
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-*/
+          )));
+}

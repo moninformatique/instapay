@@ -3,11 +3,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
-<<<<<<< HEAD
 import './../../components/constants.dart';
-=======
 import 'package:instapay_master/components/constants.dart';
->>>>>>> c4ee9f80b9f545db8351d78b43476cfc88dac89f
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserInformationProfile extends StatefulWidget {

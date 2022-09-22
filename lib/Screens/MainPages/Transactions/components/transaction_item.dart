@@ -1,25 +1,41 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../transaction_details.dart';
 import '../../../../components/constants.dart';
 
+/*
+
+        "id": 2,
+        "amount": 30500,
+        "datetime_transfer":"2022-09-20 11:23:30",
+        "status": true,
+        "stats":"1",
+        "sender": 28,
+        "recipient": 14
+*/
+
 class TransactionItem extends StatelessWidget {
-  final String fullName;
-  final String status;
-  final String imageUrl;
-  final String amount;
+  final Map<String, dynamic> transaction;
+  var list;
+  final String flow;
 
-  const TransactionItem(
+  TransactionItem(
       {Key? key,
-      required this.fullName,
-      required this.status,
-      required this.imageUrl,
-      required this.amount})
+      required this.transaction,
+      required this.flow,
+      required this.list})
       : super(key: key);
-
+//list.indexWhere((i) => i['id'] == item['id'])
   @override
   Widget build(BuildContext context) {
+    String image = "assets/logos/4-rb.png";
+    getDate(transaction["datetime_transfer"]);
+    debugPrint("$transaction");
+
     return GestureDetector(
       onTap: () {
+        /*
         Navigator.push(
             context,
             MaterialPageRoute(
@@ -28,7 +44,7 @@ class TransactionItem extends StatelessWidget {
                     letter: "A",
                     price: "537.980",
                     subTitle: "subTitle",
-                    title: "Anxowin")));
+                    title: "Anxowin")));*/
       },
       child: Row(children: [
         // Image du provider
@@ -39,7 +55,7 @@ class TransactionItem extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             image: DecorationImage(
-              image: AssetImage(imageUrl),
+              image: AssetImage(image),
               fit: BoxFit.cover,
             ),
           ),
@@ -52,20 +68,20 @@ class TransactionItem extends StatelessWidget {
             children: [
               // Nom complet de l'expéditeur
               Text(
-                fullName,
+                list["mail"],
                 style: const TextStyle(
                   color: kBoldTextColor,
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
               ),
 
               // Date de la transaction
               Text(
-                "18/09/22  15:09",
+                getDate(transaction["datetime_transfer"]),
                 style: TextStyle(
                   color: Colors.grey.shade600,
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -75,10 +91,12 @@ class TransactionItem extends StatelessWidget {
 
         // Montant de la transaction
         Text(
-          "${status == "received" ? "+ " : "- "}$amount F",
+          (flow == "in")
+              ? "+ ${transaction["amount"]}"
+              : "- ${transaction["amount"]}",
           style: TextStyle(
-            color: status == "received" ? Colors.green : Colors.red,
-            fontSize: 13,
+            color: (flow == "in") ? Colors.green : Colors.red,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -86,4 +104,33 @@ class TransactionItem extends StatelessWidget {
       ]),
     );
   }
+
+  String getDate(String date) {
+    DateTime dt = DateTime.parse(date);
+    var formatted = DateFormat('yyyy-MM-dd');
+
+    var dtFormatted = formatted.format(dt);
+    return dtFormatted;
+  }
 }
+
+
+/*
+        "id": 2,
+        "amount": 30500,
+        "datetime_transfer":"2022-09-20 11:23:30",
+        "status": true,
+        "stats":"1",
+        "sender": 28,
+        "recipient": 14
+
+        - id_transaction :  sha(id),
+        - amount
+        - datetime
+        - status
+        - stats
+        - senderUsername
+        - senderEmail
+        - flow (in, out)
+
+*/
